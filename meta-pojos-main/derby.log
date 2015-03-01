@@ -1,0 +1,13 @@
+----------------------------------------------------------------
+Sun Mar 01 20:44:58 CET 2015:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.11.1.1 - (1616546): instance a816c00e-014b-d6de-c202-000006cccf58 
+on database directory /home/yannick/Projets/meta-pojos/meta-pojos-main/derbyDB with class loader sun.misc.Launcher$AppClassLoader@73d16e93 
+Loaded from file:/home/yannick/.m2/repository/org/apache/derby/derby/10.11.1.1/derby-10.11.1.1.jar
+java.vendor=Oracle Corporation
+java.runtime.version=1.8.0_31-b13
+user.dir=/home/yannick/Projets/meta-pojos/meta-pojos-main
+os.name=Linux
+os.arch=amd64
+os.version=3.16.0-30-generic
+derby.system.home=null
+Database Class Loader started - derby.database.classpath=''
