@@ -1,7 +1,52 @@
 package com.yannicklerestif.metapojos.elements.beans;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class DBMethod implements SourceObject {
+
+	private DBClass dbClass;
+
+	private String name;
+	
+	private String desc;
+	
+	private List<DBCall> calls = new ArrayList<DBCall>();
+	
+	public List<DBCall> getCalls() {
+		return calls;
+	}
+
+	private List<DBCall> callsTo = new ArrayList<DBCall>();
+	
+	public List<DBCall> getCallsTo() {
+		return callsTo;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getDesc() {
+		return desc;
+	}
+
+	public void setDesc(String desc) {
+		this.desc = desc;
+	}
+	
+	public DBClass getDBClass() {
+		return dbClass;
+	}
+
+	public void setDBClass(DBClass dbClass) {
+		this.dbClass = dbClass;
+	}
 
 	public static class DBMethodKey {
 		public String methodName;
@@ -35,35 +80,6 @@ public class DBMethod implements SourceObject {
 			return true;
 		}
 		
-	}
-	
-	private String name;
-	private String desc;
-	
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getDesc() {
-		return desc;
-	}
-
-	public void setDesc(String desc) {
-		this.desc = desc;
-	}
-	
-	private DBClass dbClass;
-
-	public DBClass getDBClass() {
-		return dbClass;
-	}
-
-	public void setDBClass(DBClass dbClass) {
-		this.dbClass = dbClass;
 	}
 
 }

@@ -5,17 +5,12 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.InsnList;
-import org.objectweb.asm.tree.MethodNode;
 import org.springframework.stereotype.Service;
 
 import com.yannicklerestif.metapojos.elements.beans.DBClass;
@@ -26,15 +21,16 @@ import com.yannicklerestif.metapojos.elements.beans.DBMethod.DBMethodKey;
 public class DataContainer {
 
 	private Map<String, DBClass> classes = new HashMap<String, DBClass>();
+
 	// ------------------------------------------------------------------------------------
 	// container
 	// ------------------------------------------------------------------------------------
 
-	DBMethod getOrCreateDBMethod(String name, String methodName, String desc) {
-		DBClass dbClass = getOrCreateDBClass(name);
+	DBMethod getOrCreateDBMethod(String className, String methodName, String desc) {
+		DBClass dbClass = getOrCreateDBClass(className);
 		DBMethodKey key = new DBMethodKey(methodName, desc);
-		DBMethod dbMethod = dbClass.getMethods().get(key); 
-		if(dbMethod == null) {
+		DBMethod dbMethod = dbClass.getMethods().get(key);
+		if (dbMethod == null) {
 			dbMethod = new DBMethod();
 			dbMethod.setDBClass(dbClass);
 			dbMethod.setName(methodName);
@@ -46,7 +42,7 @@ public class DataContainer {
 
 	DBClass getOrCreateDBClass(String name) {
 		DBClass dbClass = classes.get(name);
-		if(dbClass == null) {
+		if (dbClass == null) {
 			dbClass = new DBClass();
 			dbClass.setName(name);
 			classes.put(name, dbClass);
@@ -104,6 +100,10 @@ public class DataContainer {
 		ClassReader cr = new ClassReader(stream);
 		MPClassVisitor visitor = new MPClassVisitor(this);
 		cr.accept(visitor, 0);
+		// ClassNode cn = new ClassNode();
+		// cr.accept(cn, 0);
+		// if (cn.name.contains("StartingClass"))
+		// System.out.println(cn.name);
 	}
 
 }
