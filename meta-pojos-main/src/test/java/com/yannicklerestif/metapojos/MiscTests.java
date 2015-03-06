@@ -10,6 +10,7 @@ public class MiscTests {
 		System.out.println(desc.substring(end + 1));
 		System.out.println("java.lang.Object.foo(Object.java:-2)");
 		System.out.println("blablabla java.lang(Object.java:123)");
+		System.out.println(Object.class.getName());
 	}
 
 }

@@ -27,22 +27,15 @@ public class MetaPojos {
 		return dc.singleClass(className);
 	}
 	
-	public static MetaPojos start(String mpHome) throws Exception {
+	public static MetaPojos start() throws Exception {
 		System.out.println("starting...");
 		long start = System.currentTimeMillis();
-		if (mpHome == null)
-			mpHome = System.getProperty("user.home");
-		mpHome = mpHome.replaceAll("\\\\", "/");
-		if (!mpHome.endsWith("/"))
-			mpHome += "/";
-		mpHome += ".meta-pojos";
-		System.setProperty(MP_HOME, mpHome);
 		ApplicationContext context = new ClassPathXmlApplicationContext("applicationContext.xml");
 		System.out.println("...started - took " + (System.currentTimeMillis() - start) + " ms");
 		return context.getBean(MetaPojos.class);
 	}
 
-	public void storeClasses(String... classesJarOrDirectories) throws Exception {
+	public void readClasses(String... classesJarOrDirectories) throws Exception {
 		System.out.println("starting reading...");
 		long start = System.currentTimeMillis();
 		dc.readClasses(classesJarOrDirectories);
