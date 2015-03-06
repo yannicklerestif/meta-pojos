@@ -10,7 +10,7 @@ meta-pojos
 |-meta-pojos-main
 |-meta-pojos-test-classes
 ```
-Then, have a look at the class meta-pojos-main/src/test/java/com/yannicklerestif/metapojos/MetaPojosTest.  
+Then, have a look at the class [meta-pojos-main/src/test/java/com/yannicklerestif/metapojos/MetaPojosTest.java](./meta-pojos-main/src/test/java/com/yannicklerestif/metapojos/MetaPojosTest.java).  
 It should work as is, you only need to change the directory where you put meta-pojos.
 
 ## Launching
