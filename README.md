@@ -45,10 +45,13 @@ Then, from the methods stream, you can get all the calls from these methods, or 
 But because object streams wrap streams, you can also use some stream methods, like `filter`, `foreach`, and do whatever you like.
 
 ### The output
-Output will look like this :
-Call from test.model.hierarchy.MyInterfaceImplChild.<init>(MyInterfaceImplChild.java:3) to test.model.hierarchy.MyInterfaceImpl.<init>(<span style="color:red" MyInterfaceImpl.java:3 </span>)  
-Call from test.model.StartingClass.startingMethod(StartingClass.java:8) to java.lang.StringBuilder.<init>(StringBuilder.java:-1)  
-Call from test.model.StartingClass.startingMethod(StartingClass.java:8) to java.lang.Object.getClass(Object.java:-1)  
-Call from test.model.StartingClass.startingMethod(StartingClass.java:8) to java.lang.StringBuilder.append(StringBuilder.java:-1)  
-Call from test.model.StartingClass.startingMethod(StartingClass.java:8) to java.lang.StringBuilder.toString(StringBuilder.java:-1)  
-Call from test.model.StartingClass.startingMethod(StartingClass.java:8) to java.io.PrintStream.println(PrintStream.java:-1)  
+Output will look like the following. On eclipse hyperlinks are clickable.
+
+Call from test.model.StartingClass.startingMethod([StartingClass.java:9]()) to test.model.hierarchy.MyInterfaceImplChild.\<init>([MyInterfaceImplChild.java:3]())  
+Call from test.model.StartingClass.startingMethod([StartingClass.java:10]()) to test.model.hierarchy.MyInterface.myInterfaceMethod([MyInterface.java:-1]())   
+Call from test.model.StartingClass.\<init>([StartingClass.java:6]()) to java.lang.Object.\<init>([Object.java:-1]())  
+Call from test.model.hierarchy.MyInterfaceImplParent.\<init>([MyInterfaceImplParent.java:3]()) to java.lang.Object.\<init>([Object.java:-1]())  
+Call from test.model.SomeClass.doSomething([SomeClass.java:5]()) to java.lang.Object.\<init>([Object.java:-1]())  
+Call from test.model.SomeClass.doSomething([SomeClass.java:6]()) to java.lang.Object.equals([Object.java:-1]())  
+Call from test.model.SomeClass.\<init>([SomeClass.java:3]()) to java.lang.Object.\<init>([Object.java:-1]())  
+Call from test.model.hierarchy.MyInterfaceImpl.\<init>([MyInterfaceImpl.java:3]()) to test.model.hierarchy.MyInterfaceImplParent.\<init>([MyInterfaceImplParent.java:3]())  
