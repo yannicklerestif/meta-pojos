@@ -19,7 +19,7 @@ public class MethodsIdsIndex {
 		return maxId;
 	}
 
-	private static class Key {
+	private static class Key   {
 		Integer classId;
 		String methodName;
 		String desc;
