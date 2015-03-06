@@ -11,7 +11,17 @@ public class DBClass implements SourceObject {
 
 	private Integer id;
 
-	private List<DBClassRelation> parents;
+	private boolean isShallow = true;
+	
+	public boolean isShallow() {
+		return isShallow;
+	}
+
+	public void setShallow(boolean isShallow) {
+		this.isShallow = isShallow;
+	}
+
+	private List<DBClassRelation> parents = new ArrayList<>();
 
 	public List<DBClassRelation> getParents() {
 		return parents;

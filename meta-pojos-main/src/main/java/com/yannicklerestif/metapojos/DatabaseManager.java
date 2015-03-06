@@ -88,11 +88,11 @@ public class DatabaseManager {
 	}
 
 	public void persist(DBClass dbClass) {
-		writeClassToFile(dbClass);
+		/*writeClassToFile(dbClass);
 		for (DBClassRelation dbClassRelation : dbClass.getParents())
 			writeClassRelationToFile(dbClassRelation);
 		for (DBMethod dbMethod : dbClass.getMethods())
-			writeMethodToFile(dbMethod);
+			writeMethodToFile(dbMethod);*/
 	}
 
 	private void writeMethodToFile(DBMethod dbMethod) {
@@ -104,15 +104,14 @@ public class DatabaseManager {
 	}
 
 	private void writeClassToFile(DBClass dbClass) {
-		writeToFile(TABLES.classes, dbClass.getId(), dbClass.getName());
+		writeToFile(TABLES.classes, dbClass.getId(), dbClass.getName(), dbClass.isShallow());
 	}
 
 	private void writeToFile(TABLES table, Object... cols) {
 		String toWrite = "";
 		for (int i = 0; i < cols.length; i++) {
-			if(cols[i] == null)
-				System.out.println(":(");
-			toWrite += "\"" + cols[i].toString() + "\"";
+			String toString = cols[i] == null ? "null" : cols[i].toString();
+			toWrite += "\"" + toString + "\"";
 			if (i < cols.length - 1)
 				toWrite += ",";
 		}
@@ -120,6 +119,10 @@ public class DatabaseManager {
 	}
 
 	public void flush() {
+		System.out.println("flushing...");
+		for (int i = 0; i < tables.length; i++) {
+			tables[i].pw.flush();
+		}
 		for (int i = 0; i < tables.length; i++) {
 			String fileName = buildImportFileName(tables[i]);
 			String tableName = tables[i].tableName.toString();
