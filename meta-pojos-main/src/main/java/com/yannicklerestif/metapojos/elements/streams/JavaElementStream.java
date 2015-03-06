@@ -8,16 +8,16 @@ import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
-import com.yannicklerestif.metapojos.elements.beans.SourceObject;
+import com.yannicklerestif.metapojos.elements.beans.JavaElementBean;
 
-public abstract class SourceObjectStream<T extends SourceObject, U extends SourceObjectStream<T,U>> {
+public abstract class JavaElementStream<T extends JavaElementBean, U extends JavaElementStream<T,U>> {
 	protected Stream<T> stream;
 
 	public Stream<T> stream() {
 		return stream;
 	}
 
-	public SourceObjectStream(Stream<T> stream) {
+	public JavaElementStream(Stream<T> stream) {
 		super();
 		this.stream = stream;
 	}

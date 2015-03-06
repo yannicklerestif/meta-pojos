@@ -2,22 +2,22 @@ package com.yannicklerestif.metapojos.elements.streams;
 
 import java.util.stream.Stream;
 
-import com.yannicklerestif.metapojos.elements.beans.DBClass;
+import com.yannicklerestif.metapojos.elements.beans.ClassBean;
 
-public class ClassStream extends SourceObjectStream<DBClass, ClassStream> {
+public class ClassStream extends JavaElementStream<ClassBean, ClassStream> {
 
 	public MethodStream getMethods() {
-		return new MethodStream(stream.flatMap(dbClass -> dbClass.getMethods().values().stream()));
+		return new MethodStream(stream.flatMap(classBean -> classBean.getMethods().values().stream()));
 	}
 
 	//---------------------------------------------------------------
 
-	public ClassStream(Stream<DBClass> stream) {
+	public ClassStream(Stream<ClassBean> stream) {
 		super(stream);
 	}
 	
 	@Override
-	protected ClassStream wrap(Stream<DBClass> stream) {
+	protected ClassStream wrap(Stream<ClassBean> stream) {
 		return new ClassStream(stream);
 	}
 	

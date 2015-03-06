@@ -6,74 +6,95 @@ import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import javax.xml.transform.stream.StreamSource;
+
 import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.tree.ClassNode;
 import org.springframework.stereotype.Service;
 
-import com.yannicklerestif.metapojos.elements.beans.DBClass;
-import com.yannicklerestif.metapojos.elements.beans.DBMethod;
-import com.yannicklerestif.metapojos.elements.beans.DBMethod.DBMethodKey;
+import com.yannicklerestif.metapojos.elements.beans.ClassBean;
+import com.yannicklerestif.metapojos.elements.beans.MethodBean;
+import com.yannicklerestif.metapojos.elements.beans.MethodBean.MethodBeanKey;
+import com.yannicklerestif.metapojos.elements.streams.ClassStream;
 
 @Service
 public class DataContainer {
 
-	private Map<String, DBClass> classes = new HashMap<String, DBClass>();
+	private Map<String, ClassBean> classes = new HashMap<String, ClassBean>();
 
 	// ------------------------------------------------------------------------------------
 	// container
 	// ------------------------------------------------------------------------------------
 
-	DBMethod getOrCreateDBMethod(String className, String methodName, String desc) {
-		DBClass dbClass = getOrCreateDBClass(className);
-		DBMethodKey key = new DBMethodKey(methodName, desc);
-		DBMethod dbMethod = dbClass.getMethods().get(key);
-		if (dbMethod == null) {
-			dbMethod = new DBMethod();
-			dbMethod.setDBClass(dbClass);
-			dbMethod.setName(methodName);
-			dbMethod.setDesc(desc);
-			dbClass.getMethods().put(key, dbMethod);
-		}
-		return dbMethod;
+	public ClassStream allClasses() {
+		return new ClassStream(classes.values().stream());
 	}
 
-	DBClass getOrCreateDBClass(String name) {
-		DBClass dbClass = classes.get(name);
-		if (dbClass == null) {
-			dbClass = new DBClass();
-			dbClass.setName(name);
-			classes.put(name, dbClass);
+	public ClassStream singleClass(String className) {
+		ClassBean classBean = classes.get(className.replace('.', '/'));
+		return new ClassStream(classBean == null ? Stream.empty() : Stream.of(classBean));
+	}
+
+	public static String classShortName(String className) {
+		return className.substring(className.lastIndexOf('/') + 1);
+	}
+
+	String[] splitDesc(String desc) {
+		int end = desc.indexOf(')');
+		return new String[] { desc.substring(1, end), desc.substring(end + 1) };
+	}
+
+	MethodBean getOrCreateMethodBean(String className, String methodName, String desc) {
+		ClassBean classBean = getOrCreateClassBean(className);
+		MethodBeanKey key = new MethodBeanKey(methodName, desc);
+		MethodBean methodBean = classBean.getMethods().get(key);
+		if (methodBean == null) {
+			methodBean = new MethodBean();
+			methodBean.setClassBean(classBean);
+			methodBean.setName(methodName);
+			methodBean.setDesc(desc);
+			classBean.getMethods().put(key, methodBean);
 		}
-		return dbClass;
+		return methodBean;
+	}
+
+	ClassBean getOrCreateClassBean(String name) {
+		ClassBean classBean = classes.get(name);
+		if (classBean == null) {
+			classBean = new ClassBean();
+			classBean.setName(name);
+			classes.put(name, classBean);
+		}
+		return classBean;
 	}
 
 	// ------------------------------------------------------------------------------------
 	// class reading
 	// ------------------------------------------------------------------------------------
 
-	public void storeClasses(String[] classesJarOrDirectories) throws Exception {
+	public void readClasses(String[] classesJarOrDirectories) throws Exception {
 		for (int i = 0; i < classesJarOrDirectories.length; i++) {
 			File classesJarOrDirectory = new File(classesJarOrDirectories[i]);
 			if (classesJarOrDirectory.isDirectory())
-				storeClassDirectory(classesJarOrDirectory);
+				readClassDirectory(classesJarOrDirectory);
 			else if (classesJarOrDirectory.getName().endsWith(".jar"))
-				storeJarFile(classesJarOrDirectory);
+				readJarFile(classesJarOrDirectory);
 			else
 				throw new IllegalArgumentException("Not a jar file or a folder : "
 						+ classesJarOrDirectory.getAbsoluteFile());
 		}
 	}
 
-	private void storeClassDirectory(File root) throws Exception {
+	private void readClassDirectory(File root) throws Exception {
 		File[] list = root.listFiles();
 		if (list == null)
 			return;
 		for (File f : list) {
 			if (f.isDirectory()) {
-				storeClassDirectory(f);
+				readClassDirectory(f);
 			} else {
 				if (!f.getName().endsWith(".class"))
 					continue;
@@ -83,7 +104,7 @@ public class DataContainer {
 		}
 	}
 
-	private void storeJarFile(File jarFile_) throws Exception {
+	private void readJarFile(File jarFile_) throws Exception {
 		ZipFile jarFile = new ZipFile(jarFile_);
 		Enumeration<? extends ZipEntry> entries = jarFile.entries();
 		while (entries.hasMoreElements()) {

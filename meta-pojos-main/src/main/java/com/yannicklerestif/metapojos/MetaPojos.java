@@ -1,12 +1,12 @@
 package com.yannicklerestif.metapojos;
 
-import java.io.IOException;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
+
+import com.yannicklerestif.metapojos.elements.streams.ClassStream;
 
 @Service
 public class MetaPojos {
@@ -19,6 +19,14 @@ public class MetaPojos {
 	@Autowired
 	Environment env;
 
+	public ClassStream allClasses() {
+		return dc.allClasses();
+	}
+	
+	public ClassStream singleClass(String className) {
+		return dc.singleClass(className);
+	}
+	
 	public static MetaPojos start(String mpHome) throws Exception {
 		System.out.println("starting...");
 		long start = System.currentTimeMillis();
@@ -35,11 +43,12 @@ public class MetaPojos {
 	}
 
 	public void storeClasses(String... classesJarOrDirectories) throws Exception {
-		System.out.println("starting storing...");
+		System.out.println("starting reading...");
 		long start = System.currentTimeMillis();
-		dc.storeClasses(classesJarOrDirectories);
+		dc.readClasses(classesJarOrDirectories);
 		System.out.println("...done - took " + (System.currentTimeMillis() - start) + " ms");
 		//		System.in.read();
+		System.out.println("-----------------------");
 	}
 
 	private MetaPojos() {
