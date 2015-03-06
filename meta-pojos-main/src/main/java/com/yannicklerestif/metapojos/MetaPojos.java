@@ -1,5 +1,7 @@
 package com.yannicklerestif.metapojos;
 
+import java.io.IOException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -18,6 +20,8 @@ public class MetaPojos {
 	Environment env;
 	
 	public static MetaPojos start(String mpHome) throws Exception {
+		System.out.println("starting...");
+		long start = System.currentTimeMillis();
 		if (mpHome == null)
 			mpHome = System.getProperty("user.home");
 		mpHome = mpHome.replaceAll("\\\\", "/");
@@ -25,14 +29,16 @@ public class MetaPojos {
 			mpHome += "/";
 		mpHome += ".meta-pojos";
 		System.setProperty(MP_HOME, mpHome);
-		String derbyHome = mpHome + "/derby";
-		System.setProperty("derby.system.home", derbyHome);
 		ApplicationContext context = new ClassPathXmlApplicationContext("applicationContext.xml");
+		System.out.println("...started - took "+(System.currentTimeMillis() - start) + " ms");
 		return context.getBean(MetaPojos.class);
 	}
 
 	public void storeClasses(String... classesJarOrDirectories) throws Exception {
+		System.out.println("starting storing...");
+		long start = System.currentTimeMillis();
 		dc.storeClasses(classesJarOrDirectories);
+		System.out.println("...done - took "+(System.currentTimeMillis() - start) + " ms");
 	}
 	
 	private MetaPojos() {
