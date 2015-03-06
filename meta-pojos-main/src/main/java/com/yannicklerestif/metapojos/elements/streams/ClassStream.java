@@ -7,7 +7,7 @@ import com.yannicklerestif.metapojos.elements.beans.DBClass;
 public class ClassStream extends SourceObjectStream<DBClass, ClassStream> {
 
 	public MethodStream getMethods() {
-		return new MethodStream(stream.flatMap(dbClass -> dbClass.getMethods().stream()));
+		return new MethodStream(stream.flatMap(dbClass -> dbClass.getMethods().values().stream()));
 	}
 
 	//---------------------------------------------------------------
