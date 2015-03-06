@@ -30,38 +30,7 @@ public class DataContainer {
 	// container
 	// ------------------------------------------------------------------------------------
 
-	private void addClass(ClassNode cn) {
-		String name = cn.name; 
-		System.out.println(name);
-		DBClass dbClass = getOrCreateDBClass(name);
-
-		//Class is already present : first one one classpath wins
-		if(!dbClass.isShallow())
-			return;
-		dbClass.setShallow(false);
-		
-		DBClass parent = getOrCreateDBClass(cn.superName);
-		dbClass.addParent(parent);
-		parent.addChild(dbClass);
-		for (String interfaceName : cn.interfaces) {
-			parent = getOrCreateDBClass(interfaceName);
-			dbClass.addParent(parent);
-			parent.addChild(dbClass);
-		}
-
-		for (MethodNode method : cn.methods) {
-			getOrCreateDBMethod(name, method.name, method.desc);
-			ListIterator<AbstractInsnNode> iterator = method.instructions.iterator();
-			while (iterator.hasNext()) {
-				AbstractInsnNode node = iterator.next();
-				if(node.getOpcode() == Opcodes.INVOKEVIRTUAL) {
-					//TODO
-				}
-			}
-		}
-	}
-
-	private DBMethod getOrCreateDBMethod(String name, String methodName, String desc) {
+	DBMethod getOrCreateDBMethod(String name, String methodName, String desc) {
 		DBClass dbClass = getOrCreateDBClass(name);
 		DBMethodKey key = new DBMethodKey(methodName, desc);
 		DBMethod dbMethod = dbClass.getMethods().get(key); 
@@ -75,7 +44,7 @@ public class DataContainer {
 		return dbMethod;
 	}
 
-	private DBClass getOrCreateDBClass(String name) {
+	DBClass getOrCreateDBClass(String name) {
 		DBClass dbClass = classes.get(name);
 		if(dbClass == null) {
 			dbClass = new DBClass();
@@ -133,9 +102,8 @@ public class DataContainer {
 
 	private void processClassInputStream(InputStream stream) throws Exception {
 		ClassReader cr = new ClassReader(stream);
-		ClassNode cn = new ClassNode();
-		cr.accept(cn, 0);
-		addClass(cn);
+		MPClassVisitor visitor = new MPClassVisitor(this);
+		cr.accept(visitor, 0);
 	}
 
 }
