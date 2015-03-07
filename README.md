@@ -50,9 +50,10 @@ From here, you can just use content assist to see what you can do, or read ahead
 ### How does it work
 The two methods above return a `ClassStream` object, that wraps a Java 8 `Stream<ClassBean>`, `ClassBean` being 
 the class that represents a Java class.  
-On `ClassStream` you can for example apply `getMethods()`. This will return a `MethodStream`, wrapping a stream of all the methods in the classes in the stream.  
+On `ClassStream` you can for example apply `getMethods()`. This will return a `MethodStream`, wrapping a stream of all the methods in the classes in the classes stream.  
 Then, from the methods stream, you can get all the calls from these methods, or all the calls **to** these methods... and so on.  
-But because object streams wrap streams, you can also use some stream methods, like `filter`, `foreach`, and do whatever you like.
+And, because object streams wrap streams, you can also use some stream methods, like `filter`, `foreach`, merge them, and so on.
+Last but not least, because it's Java code you can really do whatever you want : use custom inputs, write results to wherever you like, perform some processing on intermediary results, debug your code... 
 
 ### The output
 Output will look like the following. On eclipse hyperlinks are clickable.
