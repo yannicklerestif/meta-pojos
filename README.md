@@ -1,7 +1,15 @@
 # meta-pojos
 The purpose of meta-pojos is to provide a very intuitive and easy-to-use api to browse your Java code.
-The querying is done in Java, allowing you to use your favorite IDE for content assist.
+The querying is done in Java, allowing you to use your favorite IDE for content assist. For example you can do this :
+```java
+mp.allClasses().filter(clazz -> (clazz.getName().contains("DAO")).getMethods().getCallsTo();
+```
+This will give you all calls to all methods in classes whose name contains "DAO".
 The results are output to console. If you use eclipse the output will be hyperlinks to places in your code.
+
+The project is inspired by the very nice [Browse By Query project](http://browsebyquery.sourceforge.net/).   
+Have a look at the documentation there if're you're wondering what could be done with meta-pojos, because everything you can do with BBQ should be do-able with meta-pojos, it's just a matter of adding methods to the api. So if you're interested but there's something you think I should add, don't hesitate to tell me. 
+
 ## Setup
 Once you have downloaded the project, import meta-pojos-main into your IDE. It is a maven project.  
 I don't know if you'll find interest in the other project, meta-pojos-test-classes : is a just a sample project to browse. Browsing your own projects should be more interesting !
