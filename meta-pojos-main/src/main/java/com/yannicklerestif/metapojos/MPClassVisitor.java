@@ -33,11 +33,14 @@ public class MPClassVisitor extends ClassVisitor {
 		}
 		classBean.setShallow(false);
 
-		ClassBean parent = dc.getOrCreateClassBean(superName);
-		classBean.addParent(parent);
-		parent.addChild(classBean);
+		//if class is java.lang.Object, superName is null
+		if(superName != null) {
+			ClassBean parent = dc.getOrCreateClassBean(superName);
+			classBean.addParent(parent);
+			parent.addChild(classBean);
+		}
 		for (String interfaceName : interfaces) {
-			parent = dc.getOrCreateClassBean(interfaceName);
+			ClassBean parent = dc.getOrCreateClassBean(interfaceName);
 			classBean.addParent(parent);
 			parent.addChild(classBean);
 		}

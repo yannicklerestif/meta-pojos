@@ -35,15 +35,24 @@ public class MetaPojos {
 		return context.getBean(MetaPojos.class);
 	}
 
-	public void readClasses(String... classesJarOrDirectories) throws Exception {
+	/**
+	 * Loads database with classes in specified locations.<br>
+	 * Locations are names of files or directories, and can be :<br>
+	 * - A full path to a class directory<br>
+	 * - A full path to a jar file<br> 
+	 * - A full path to a file containing locations
+	 * @param locations
+	 * @throws Exception
+	 */
+	public void readClasses(String... locations) throws Exception {
 		System.out.println("starting reading...");
 		long start = System.currentTimeMillis();
-		dc.readClasses(classesJarOrDirectories);
+		dc.readClasses(locations);
 		System.out.println("...done - took " + (System.currentTimeMillis() - start) + " ms");
 		//		System.in.read();
 		System.out.println("-----------------------");
 	}
-
+	
 	private MetaPojos() {
 	}
 
