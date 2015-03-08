@@ -6,6 +6,13 @@ import com.yannicklerestif.metapojos.elements.beans.ClassBean;
 
 public class ClassStream extends JavaElementStream<ClassBean, ClassStream> {
 
+	//TODO getDerivedClasses
+	//TODO getRecursiveDerivedClasses
+	//TODO getBaseClasses
+	//TODO getRecursiveBaseClasses
+	//TODO getReferences
+	//TODO getReferrers
+	
 	public MethodStream getMethods() {
 		return new MethodStream(stream.flatMap(classBean -> classBean.getMethods().values().stream()));
 	}

@@ -12,11 +12,11 @@ import com.yannicklerestif.metapojos.elements.beans.JavaElementBean;
 
 public abstract class JavaElementStream<T extends JavaElementBean, U extends JavaElementStream<T,U>> {
 	
-	
 	// TODO rename and reorganize methods
 	// - filterByXXX (filterByName,...) for filtering methods
 	// - streamXXX (streamSorted, streamUnique...) for methods delegating to underlying stream
 	// - add a boolean to print => print(classifiedNamesInClassParameters)
+	//TODO Javadoc for methods in JavaElementStream and child classes
 	
 	protected Stream<T> stream;
 
