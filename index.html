@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="description" content="Meta-pojos : A Java API for browsing your Java code">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Meta-pojos</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/yannick1976/meta-pojos">View on GitHub</a>
+
+          <h1 id="project_title">Meta-pojos</h1>
+          <h2 id="project_tagline">A Java API for browsing your Java code</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/yannick1976/meta-pojos/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/yannick1976/meta-pojos/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>
+<a id="meta-pojos" class="anchor" href="#meta-pojos" aria-hidden="true"><span class="octicon octicon-link"></span></a>meta-pojos</h1>
+
+<p>The purpose of meta-pojos is to provide a very intuitive and easy-to-use API to browse your Java code.
+The querying is done in Java, allowing you to use your favorite IDE for content assist. For example you can do this :</p>
+
+<div class="highlight highlight-java"><pre>mp<span class="pl-k">.</span>allClasses()<span class="pl-k">.</span>filter(clazz <span class="pl-k">-</span><span class="pl-k">&gt;</span> (clazz<span class="pl-k">.</span>getName()<span class="pl-k">.</span>contains(<span class="pl-s1"><span class="pl-pds">"</span>DAO<span class="pl-pds">"</span></span>))<span class="pl-k">.</span>getMethods()<span class="pl-k">.</span>getCallsTo();</pre></div>
+
+<p>This will give you all calls to all methods in classes whose name contains "DAO".
+The results are output to console. If you use eclipse the output will be hyperlinks to places in your code.</p>
+
+<p>The project is inspired by the very nice <a href="http://browsebyquery.sourceforge.net/">Browse By Query project</a>.<br>
+Have a look at the documentation there if you're wondering what could be done with meta-pojos, because everything you can do with BBQ should be do-able with meta-pojos, it's just a matter of adding methods to the API. So if you're interested but there's something you think I should add, don't hesitate to tell me. </p>
+
+<p>The project should also become an eclipse plugin, so that you don't have to tell it where your classes are, and also because it will be nicer to display the results as a tree in a specific view (that would look like search results or call hierarchy).</p>
+
+<h2>
+<a id="setup" class="anchor" href="#setup" aria-hidden="true"><span class="octicon octicon-link"></span></a>Setup</h2>
+
+<p>Once you have downloaded the project, import meta-pojos-main into your IDE. It is a maven project.<br>
+I don't know if you'll find interest in the other project, meta-pojos-test-classes : is a just a sample project to browse. Browsing your own projects should be more interesting !</p>
+
+<pre><code>meta-pojos
+|-meta-pojos-main
+|-meta-pojos-test-classes
+</code></pre>
+
+<p>Then, have a look at the class <a href="./meta-pojos-main/src/test/java/com/yannicklerestif/metapojos/MetaPojosTest.java">meta-pojos-main/src/test/java/com/yannicklerestif/metapojos/MetaPojosTest.java</a>.<br>
+It should work as is, you only need to change the directory where you put meta-pojos.</p>
+
+<h2>
+<a id="launching" class="anchor" href="#launching" aria-hidden="true"><span class="octicon octicon-link"></span></a>Launching</h2>
+
+<p>You init MetaPojos like this :</p>
+
+<div class="highlight highlight-java"><pre><span class="pl-stj">MetaPojos</span> mp <span class="pl-k">=</span> <span class="pl-stj">MetaPojos</span><span class="pl-k">.</span>start();
+mp<span class="pl-k">.</span>readClasses(<span class="pl-s1"><span class="pl-pds">"</span>/home/yannick/Projets/meta-pojos/meta-pojos-test-classes/bin<span class="pl-pds">"</span></span>);</pre></div>
+
+<p>you can use class directories, jars, or both :</p>
+
+<pre><code>mp.readClasses("myDir1", "myJar1.jar", "myDir2");
+</code></pre>
+
+<p>Use only one <code>readClasses</code> instruction.<br>
+Classes directories must be in <strong>binary</strong> format (.class files, not source files).</p>
+
+<h2>
+<a id="querying" class="anchor" href="#querying" aria-hidden="true"><span class="octicon octicon-link"></span></a>Querying</h2>
+
+<p>A query will then look like this :</p>
+
+<div class="highlight highlight-java"><pre>mp<span class="pl-k">.</span>singleClass(<span class="pl-s1"><span class="pl-pds">"</span>test.model.hierarchy.MyInterface<span class="pl-pds">"</span></span>)<span class="pl-k">.</span>getMethods()<span class="pl-k">.</span>getCallsTo()<span class="pl-k">.</span>print();</pre></div>
+
+<p>There are two starting points :</p>
+
+<ul>
+<li>
+<code>mp.singleClass(String className)</code> (or add your project as a dependency and use <code>com.yourcompany.YourClass.class.getName()</code>)</li>
+<li><code>mp.allClasses()</code></li>
+</ul>
+
+<p>From here, you can just use content assist to see what you can do, or read ahead for some more explanations :</p>
+
+<h3>
+<a id="how-does-it-work" class="anchor" href="#how-does-it-work" aria-hidden="true"><span class="octicon octicon-link"></span></a>How does it work</h3>
+
+<p>The two methods above return a <code>ClassStream</code> object, that wraps a Java 8 <code>Stream&lt;ClassBean&gt;</code>, <code>ClassBean</code> being 
+the class that represents a Java class.<br>
+On <code>ClassStream</code> you can for example apply <code>getMethods()</code>. This will return a <code>MethodStream</code>, wrapping a stream of all the methods in the classes in the classes stream.<br>
+Then, from the methods stream, you can get all the calls from these methods, or all the calls <strong>to</strong> these methods... and so on.<br>
+And, because object streams wrap streams, you can also use some stream methods, like <code>filter</code>, <code>foreach</code>, merge them, and so on.
+Last but not least, because it's Java code you can really do whatever you want : use custom inputs, write results to wherever you like, perform some processing on intermediary results, debug your code... </p>
+
+<h3>
+<a id="the-output" class="anchor" href="#the-output" aria-hidden="true"><span class="octicon octicon-link"></span></a>The output</h3>
+
+<p>Output will look like the following. On eclipse hyperlinks are clickable.</p>
+
+<p>Call from test.model.StartingClass.startingMethod(<a href="">StartingClass.java:9</a>) to test.model.hierarchy.MyInterfaceImplChild.&lt;init&gt;(<a href="">MyInterfaceImplChild.java:3</a>)<br>
+Call from test.model.StartingClass.startingMethod(<a href="">StartingClass.java:10</a>) to test.model.hierarchy.MyInterface.myInterfaceMethod(<a href="">MyInterface.java:-1</a>)<br>
+Call from test.model.StartingClass.&lt;init&gt;(<a href="">StartingClass.java:6</a>) to java.lang.Object.&lt;init&gt;(<a href="">Object.java:-1</a>)<br>
+Call from test.model.hierarchy.MyInterfaceImplParent.&lt;init&gt;(<a href="">MyInterfaceImplParent.java:3</a>) to java.lang.Object.&lt;init&gt;(<a href="">Object.java:-1</a>)<br>
+Call from test.model.SomeClass.doSomething(<a href="">SomeClass.java:5</a>) to java.lang.Object.&lt;init&gt;(<a href="">Object.java:-1</a>)<br>
+Call from test.model.SomeClass.doSomething(<a href="">SomeClass.java:6</a>) to java.lang.Object.equals(<a href="">Object.java:-1</a>)<br>
+Call from test.model.SomeClass.&lt;init&gt;(<a href="">SomeClass.java:3</a>) to java.lang.Object.&lt;init&gt;(<a href="">Object.java:-1</a>)<br>
+Call from test.model.hierarchy.MyInterfaceImpl.&lt;init&gt;(<a href="">MyInterfaceImpl.java:3</a>) to test.model.hierarchy.MyInterfaceImplParent.&lt;init&gt;(<a href="">MyInterfaceImplParent.java:3</a>)  </p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Meta-pojos maintained by <a href="https://github.com/yannick1976">yannick1976</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
