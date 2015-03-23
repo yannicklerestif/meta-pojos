@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+         point="org.eclipse.ui.views">
+      <category
+            name="Sample Category"
+            id="meta-pojos-plugin">
+      </category>
+      <view
+            name="Sample View"
+            icon="icons/sample.gif"
+            category="meta-pojos-plugin"
+            class="com.yannicklerestif.metapojos.SampleView"
+            id="com.yannicklerestif.metapojos.SampleView">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="org.eclipse.jdt.ui.JavaPerspective">
+         <view
+               ratio="0.5"
+               relative="org.eclipse.ui.views.ProblemView"
+               relationship="right"
+               id="com.yannicklerestif.metapojos.SampleView">
+         </view>
+      </perspectiveExtension>
+   </extension>
+   <extension
+         point="org.eclipse.help.contexts">
+      <contexts
+            file="contexts.xml">
+      </contexts>
+   </extension>
+	<extension point="org.eclipse.debug.core.launchConfigurationTypes">
+	    <launchConfigurationType
+	        name="Meta Pojos Query"
+	        delegate="com.yannicklerestif.metapojos.plugin.MetaPojosLaunchConfigurationDelegate"
+	        modes="run"               
+	        id="com.yannicklerestif.metapojos.Launcher">        
+	    </launchConfigurationType>
+	</extension>
+	<extension point="org.eclipse.debug.ui.launchConfigurationTypeImages">
+	    <launchConfigurationTypeImage
+	        icon="icons/mp.gif"
+	        configTypeID="com.yannicklerestif.metapojos.Launcher"
+	        id="com.yannicklerestif.metapojos.Launcher.image">
+	    </launchConfigurationTypeImage>
+	</extension>
+	<extension point="org.eclipse.debug.ui.launchConfigurationTabGroups">
+	    <launchConfigurationTabGroup
+	        type="com.yannicklerestif.metapojos.Launcher"
+	        class="com.yannicklerestif.metapojos.plugin.MetaPojosLaunchTabGroup"
+	        id="com.yannicklerestif.metapojos.launcherTabGroup">
+	    </launchConfigurationTabGroup>
+	</extension>
+	<extension point="org.eclipse.debug.ui.launchShortcuts">
+	    <shortcut
+	        id="com.yannicklerestif.metapojos.LauncherShortcut"
+	        icon="icons/mp.gif"
+	        class="com.yannicklerestif.metapojos.plugin.MetaPojosLaunchShortcut"
+	        label="Meta Pojos Query"
+	        modes="run">
+	        <contextualLaunch>
+           <enablement>
+           </enablement>
+  		 </contextualLaunch>
+	    </shortcut>
+	</extension>
+</plugin>
