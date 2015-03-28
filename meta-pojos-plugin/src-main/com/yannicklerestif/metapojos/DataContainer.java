@@ -2,7 +2,6 @@ package com.yannicklerestif.metapojos;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.Enumeration;
@@ -13,14 +12,12 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import org.objectweb.asm.ClassReader;
-import org.springframework.stereotype.Service;
 
 import com.yannicklerestif.metapojos.elements.beans.ClassBean;
 import com.yannicklerestif.metapojos.elements.beans.MethodBean;
 import com.yannicklerestif.metapojos.elements.beans.MethodBean.MethodBeanKey;
 import com.yannicklerestif.metapojos.elements.streams.ClassStream;
 
-@Service
 public class DataContainer {
 
 	private Map<String, ClassBean> classes = new HashMap<String, ClassBean>();

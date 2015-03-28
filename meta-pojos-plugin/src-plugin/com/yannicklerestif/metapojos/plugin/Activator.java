@@ -1,4 +1,4 @@
-package meta_pojos_plugin;
+package com.yannicklerestif.metapojos.plugin;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;

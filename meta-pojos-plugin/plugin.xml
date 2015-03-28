@@ -12,7 +12,7 @@
             name="Sample View"
             icon="icons/sample.gif"
             category="meta-pojos-plugin"
-            class="com.yannicklerestif.metapojos.SampleView"
+            class="com.yannicklerestif.metapojos.plugin.SampleView"
             id="com.yannicklerestif.metapojos.SampleView">
       </view>
    </extension>
@@ -68,5 +68,37 @@
            </enablement>
   		 </contextualLaunch>
 	    </shortcut>
+	</extension>
+	<extension
+      point="org.eclipse.core.resources.natures"
+      id="metaPojosNature"
+      name="Meta Pojos Nature">
+      <runtime>
+         <run class="com.yannicklerestif.metapojos.plugin.MetaPojosProjectNature">
+         </run>
+      </runtime>
+    </extension>
+    <extension
+      point="org.eclipse.ui.ide.projectNatureImages">
+   		<image
+         icon="icons/project_icon.gif"
+         id="com.yannicklerestif.metapojos.nature.image"
+         natureId="meta-pojos-plugin.metaPojosNature">
+   		</image>
+	</extension>
+    <extension
+       point="org.eclipse.ui.newWizards">
+	    <category
+	          id="meta-pojos-plugin.category2"
+	          name="Meta Pojos">
+	    </category>
+	    <wizard
+	          category="meta-pojos-plugin.category2"
+	          class="com.yannicklerestif.metapojos.plugin.MetaPojosNewWizard"
+	          icon="icons/mp.gif"
+	          id="meta-pojos-plugin.wizard2"
+	          name="Meta Pojos"
+	          project="true">
+	    </wizard>
 	</extension>
 </plugin>

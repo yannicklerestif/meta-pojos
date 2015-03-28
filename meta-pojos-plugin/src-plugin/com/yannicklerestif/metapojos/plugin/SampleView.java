@@ -1,4 +1,4 @@
-package com.yannicklerestif.metapojos;
+package com.yannicklerestif.metapojos.plugin;
 
 
 import org.eclipse.swt.widgets.Composite;

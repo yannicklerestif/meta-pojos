@@ -26,9 +26,6 @@ public class MetaPojosLaunchConfigurationDelegate extends LaunchConfigurationDel
 	@Override
 	public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor)
 			throws CoreException {
-		System.out.println();
-		System.out.println("Launching -------------------------------");
-
 		String mainType = (String) configuration.getAttributes().get(
 				IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME);
 		String projectName = (String) configuration.getAttributes().get(
@@ -45,7 +42,7 @@ public class MetaPojosLaunchConfigurationDelegate extends LaunchConfigurationDel
 
 		try {
 			URL url = outputLocation.toURI().toURL();
-			cl = new URLClassLoader(new URL[] { url }, null);
+			cl = new URLClassLoader(new URL[] { url }, Thread.currentThread().getContextClassLoader());
 			clazz = cl.loadClass(mainType);
 			Method mainMethod = clazz.getMethod("main", String[].class);
 			mainMethod.invoke(null, new Object[] { null });

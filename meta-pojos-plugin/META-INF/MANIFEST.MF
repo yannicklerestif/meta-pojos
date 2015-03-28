@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Meta-pojos-plugin
 Bundle-SymbolicName: meta-pojos-plugin;singleton:=true
 Bundle-Version: 1.0.0.qualifier
-Bundle-Activator: meta_pojos_plugin.Activator
+Bundle-Activator: com.yannicklerestif.metapojos.plugin.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.debug.core;bundle-version="3.9.1",
@@ -12,6 +12,9 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.jdt.core;bundle-version="3.10.2",
  org.eclipse.jdt.debug;bundle-version="3.8.102",
  org.eclipse.jdt.debug.ui;bundle-version="3.6.300",
- org.eclipse.jdt.launching;bundle-version="3.7.102"
+ org.eclipse.jdt.launching;bundle-version="3.7.102",
+ org.eclipse.jdt.ui;bundle-version="3.10.2",
+ org.eclipse.ui.ide;bundle-version="3.10.2",
+ org.objectweb.asm;bundle-version="5.0.1"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ActivationPolicy: lazy
