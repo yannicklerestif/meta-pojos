@@ -1,10 +1,10 @@
 package com.yannicklerestif.metapojos;
 
 import com.yannicklerestif.metapojos.elements.streams.ClassStream;
+import com.yannicklerestif.metapojos.plugin.Console;
+import com.yannicklerestif.metapojos.plugin.PluginAccessor;
 
 public class MetaPojos {
-
-	public static final String MP_HOME = "mp.home";
 
 	private DataContainer dc;
 
@@ -17,13 +17,11 @@ public class MetaPojos {
 	}
 	
 	public static MetaPojos start() throws Exception {
-		//TODO output in target eclipse
-		System.out.println("starting...");
+		PluginAccessor.getPlugin().getConsole().println("starting...");
 		long start = System.currentTimeMillis();
 		MetaPojos mp = new MetaPojos();
 		mp.dc = new DataContainer();
-		//TODO output in target eclipse
-		System.out.println("...started - took " + (System.currentTimeMillis() - start) + " ms");
+		PluginAccessor.getPlugin().getConsole().println("...started - took " + (System.currentTimeMillis() - start) + " ms");
 		return mp;
 	}
 
@@ -37,18 +35,18 @@ public class MetaPojos {
 	 * @throws Exception
 	 */
 	public void readClasses(String... locations) throws Exception {
-		//TODO output in target eclipse
-		System.out.println("starting reading...");
+		PluginAccessor.getPlugin().getConsole().println("starting reading...");
 		long start = System.currentTimeMillis();
 		dc.readClasses(locations);
-		//TODO output in target eclipse
-		System.out.println("...done - took " + (System.currentTimeMillis() - start) + " ms");
-		//		System.in.read();
-		//TODO output in target eclipse
-		System.out.println("-----------------------");
+		PluginAccessor.getPlugin().getConsole().println("...done - took " + (System.currentTimeMillis() - start) + " ms");
+		PluginAccessor.getPlugin().getConsole().println("-----------------------");
 	}
 	
 	private MetaPojos() {
+	}
+	
+	public static Console getConsole() {
+		return PluginAccessor.getPlugin().getConsole();
 	}
 
 }

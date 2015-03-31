@@ -1,6 +1,5 @@
 package com.yannicklerestif.metapojos;
 
-import com.yannicklerestif.metapojos.elements.beans.ClassBean;
 
 
 

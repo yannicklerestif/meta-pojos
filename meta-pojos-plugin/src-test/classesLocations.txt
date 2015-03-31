@@ -1,5 +1,4 @@
-/home/yannick/Projets/meta-pojos/meta-pojos-main/target/classes
-/home/yannick/Projets/meta-pojos/meta-pojos-main/target/test-classes
+/home/yannick/Projets/meta-pojos/meta-pojos-plugin/bin
 /home/yannick/Projets/meta-pojos/meta-pojos-test-classes/bin
 /usr/lib/java/jdk1.8.0_31/jre/lib/rt.jar
 /home/yannick/.m2/repository/org/ow2/asm/asm-debug-all/5.0.3/asm-debug-all-5.0.3.jar

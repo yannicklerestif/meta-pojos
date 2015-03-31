@@ -9,6 +9,7 @@ import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 import com.yannicklerestif.metapojos.elements.beans.JavaElementBean;
+import com.yannicklerestif.metapojos.plugin.PluginAccessor;
 
 public abstract class JavaElementStream<T extends JavaElementBean, U extends JavaElementStream<T,U>> {
 	
@@ -32,7 +33,7 @@ public abstract class JavaElementStream<T extends JavaElementBean, U extends Jav
 	protected abstract U wrap(Stream<T> stream);
 	
 	public void print() {
-		this.stream.forEach(System.out::println);
+		this.stream.forEach(PluginAccessor.getPlugin().getConsole()::println);
 	}
 	
 	public U matches(String pattern) {

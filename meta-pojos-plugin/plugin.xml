@@ -101,4 +101,10 @@
 	          project="true">
 	    </wizard>
 	</extension>
+    <!--inutile pour l'instant-->
+    <!--<extension
+          point="org.eclipse.ui.startup">
+       <startup
+             class="com.yannicklerestif.metapojos.plugin.MetaPojosEarlyStartup"></startup>
+    </extension>-->
 </plugin>

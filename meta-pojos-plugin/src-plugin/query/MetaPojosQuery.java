@@ -2,7 +2,7 @@ package query;
 
 import com.yannicklerestif.metapojos.MetaPojos;
 
-
+//FIXME change location in PDE project otherwise PDE version hides user version !!!
 public class MetaPojosQuery {
 	public static void main(String[] args) throws Exception {
 		MetaPojos mp = MetaPojos.start();
@@ -13,6 +13,6 @@ public class MetaPojosQuery {
 //		mp.singleClass("test.model.hierarchy.MyInterface").getMethods().getCallsTo().print();
 		
 		//TODO output in target eclipse
-		System.out.println(mp.allClasses().stream().count());
+		MetaPojos.getConsole().println(mp.allClasses().stream().count());
 	}
 }
