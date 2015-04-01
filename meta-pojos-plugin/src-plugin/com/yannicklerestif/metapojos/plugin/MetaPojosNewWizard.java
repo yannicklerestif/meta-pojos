@@ -48,7 +48,7 @@ public class MetaPojosNewWizard extends JavaProjectWizard {
 			IFolder queryFolder = sourceFolder.getFolder("query");
 			queryFolder.create(IResource.NONE, true, null);
 			IFile file = queryFolder.getFile("MetaPojosQuery.java");
-			URL url = new URL("platform:/plugin/meta-pojos-plugin/src-plugin/query/MetaPojosQuery.java");
+			URL url = new URL("platform:/plugin/meta-pojos-plugin/dist/MetaPojosQuery.java");
 			InputStream inputStream = url.openConnection().getInputStream();
 			file.create(inputStream, IResource.NONE, null);
 			inputStream.close();

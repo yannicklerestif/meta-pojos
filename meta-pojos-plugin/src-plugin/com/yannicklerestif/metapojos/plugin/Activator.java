@@ -1,9 +1,19 @@
 package com.yannicklerestif.metapojos.plugin;
 
+import java.io.File;
+
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
@@ -26,13 +36,13 @@ public class Activator extends AbstractUIPlugin implements MetaPojosPlugin {
 	private static Activator plugin;
 
 	private static class ConsoleHandle implements Console {
-		
+
 		public MessageConsoleStream metaPojosConsoleOutputStream = null;
 
 		public ConsoleHandle(MessageConsoleStream metaPojosConsoleOutputStream) {
 			this.metaPojosConsoleOutputStream = metaPojosConsoleOutputStream;
 		}
-		
+
 		public void println(Object message) {
 			metaPojosConsoleOutputStream.println(message == null ? "null" : message.toString());
 		}
@@ -44,12 +54,11 @@ public class Activator extends AbstractUIPlugin implements MetaPojosPlugin {
 		public void print(Object message) {
 			metaPojosConsoleOutputStream.print(message == null ? "null" : message.toString());
 		}
-		
+
 	}
 
 	private ConsoleHandle consoleHandle;
-	
-	
+
 	/**
 	 * The constructor
 	 */
@@ -91,7 +100,7 @@ public class Activator extends AbstractUIPlugin implements MetaPojosPlugin {
 	 */
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
-		if(consoleHandle.metaPojosConsoleOutputStream.isClosed())
+		if (consoleHandle.metaPojosConsoleOutputStream.isClosed())
 			System.out.println("console stream is already closed.");
 		else
 			consoleHandle.metaPojosConsoleOutputStream.close();
@@ -120,10 +129,59 @@ public class Activator extends AbstractUIPlugin implements MetaPojosPlugin {
 	}
 
 	//------------------------ MetaPojosPlugin interface -------------------------------
-	
+
 	@Override
 	public Console getConsole() {
 		return consoleHandle;
 	}
-	
+
+	@Override
+	public File[] getClassesLocations() {
+		IWorkspace workspace = ResourcesPlugin.getWorkspace();
+		IWorkspaceRoot root = workspace.getRoot();
+		IProject[] projects = root.getProjects();
+		for (IProject project : projects) {
+			try {
+				System.out.println("Working in project " + project.getName() + " ---------------");
+				// check if we have a Java project
+				if (project.isNatureEnabled("org.eclipse.jdt.core.javanature")) {
+					IJavaProject javaProject = JavaCore.create(project);
+					IClasspathEntry[] resolvedClasspath = javaProject.getResolvedClasspath(true);
+					for (int i = 0; i < resolvedClasspath.length; i++) {
+						IClasspathEntry entry = resolvedClasspath[i];
+						String kind = "";
+						switch ((entry.getEntryKind())) {
+						case IClasspathEntry.CPE_SOURCE:
+							kind = "CPE_SOURCE";
+							break;
+						case IClasspathEntry.CPE_CONTAINER:
+							kind = "CPE_CONTAINER";
+							break;
+						case IClasspathEntry.CPE_LIBRARY:
+							kind = "CPE_LIBRARY";
+							break;
+						case IClasspathEntry.CPE_PROJECT:
+							kind = "CPE_PROJECT";
+							break;
+						case IClasspathEntry.CPE_VARIABLE:
+							kind = "CPE_VARIABLE";
+							break;
+						default:
+							break;
+						}
+						System.out.println(kind + " => " + entry.getPath());
+//						IPath path = project.getOutputLocation();
+//						IFolder folder = root.getFolder(path);
+//						File outputLocation = folder.getLocation().toFile();
+//						System.out.println(entry);
+					}
+				}
+			} catch (CoreException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return new File[] {};
+	}
+
 }

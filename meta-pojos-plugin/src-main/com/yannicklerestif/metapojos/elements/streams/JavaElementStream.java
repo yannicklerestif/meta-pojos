@@ -33,6 +33,7 @@ public abstract class JavaElementStream<T extends JavaElementBean, U extends Jav
 	protected abstract U wrap(Stream<T> stream);
 	
 	public void print() {
+		//TODO hyperlinks in console are broken since output is done through plugin to user console
 		this.stream.forEach(PluginAccessor.getPlugin().getConsole()::println);
 	}
 	

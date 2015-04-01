@@ -42,6 +42,11 @@ public class MetaPojos {
 		PluginAccessor.getPlugin().getConsole().println("-----------------------");
 	}
 	
+	//FIXME read all projects classes and dependencies
+	public void readClasses() {
+		PluginAccessor.getPlugin().getClassesLocations();
+	}
+	
 	private MetaPojos() {
 	}
 	
