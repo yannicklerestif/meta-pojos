@@ -2,7 +2,7 @@ package com.yannicklerestif.metapojos.plugin;
 
 import java.io.File;
 
-import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
@@ -150,15 +150,30 @@ public class Activator extends AbstractUIPlugin implements MetaPojosPlugin {
 					for (int i = 0; i < resolvedClasspath.length; i++) {
 						IClasspathEntry entry = resolvedClasspath[i];
 						String kind = "";
+						File location = null;
 						switch ((entry.getEntryKind())) {
 						case IClasspathEntry.CPE_SOURCE:
 							kind = "CPE_SOURCE";
+							IPath outputLocation = entry.getOutputLocation();
+							if(outputLocation != null)
+								//source folder has a specific output location
+								location = root.getFolder(outputLocation).getLocation().toFile();
+							else
+								//otherwise output is project default output folder
+								location = root.getFolder(javaProject.getOutputLocation()).getLocation().toFile();
 							break;
 						case IClasspathEntry.CPE_CONTAINER:
 							kind = "CPE_CONTAINER";
 							break;
 						case IClasspathEntry.CPE_LIBRARY:
 							kind = "CPE_LIBRARY";
+							IFile file = root.getFile(entry.getPath());
+							if(file.exists())
+								//location is in the workspace
+								location = file.getLocation().toFile();
+							else
+								//location is not in the workspace => should be an external library
+								location = entry.getPath().toFile(); 
 							break;
 						case IClasspathEntry.CPE_PROJECT:
 							kind = "CPE_PROJECT";
@@ -169,11 +184,7 @@ public class Activator extends AbstractUIPlugin implements MetaPojosPlugin {
 						default:
 							break;
 						}
-						System.out.println(kind + " => " + entry.getPath());
-//						IPath path = project.getOutputLocation();
-//						IFolder folder = root.getFolder(path);
-//						File outputLocation = folder.getLocation().toFile();
-//						System.out.println(entry);
+						System.out.println("kind : " + kind + " - location : " + location);
 					}
 				}
 			} catch (CoreException e) {
