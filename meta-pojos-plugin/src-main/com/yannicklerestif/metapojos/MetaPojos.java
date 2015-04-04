@@ -6,6 +6,10 @@ import com.yannicklerestif.metapojos.plugin.PluginAccessor;
 
 public class MetaPojos {
 
+	//FIXME reorganize classes
+	//FIXME do not reload database if nothing has happened since last query
+	
+	//TODO Data container must be moved to plugin 
 	private DataContainer dc;
 
 	public ClassStream allClasses() {
@@ -22,6 +26,7 @@ public class MetaPojos {
 		MetaPojos mp = new MetaPojos();
 		mp.dc = new DataContainer();
 		PluginAccessor.getPlugin().getConsole().println("...started - took " + (System.currentTimeMillis() - start) + " ms");
+		mp.readClasses(PluginAccessor.getPlugin().getClassesLocations());
 		return mp;
 	}
 
@@ -34,17 +39,12 @@ public class MetaPojos {
 	 * @param locations
 	 * @throws Exception
 	 */
-	public void readClasses(String... locations) throws Exception {
+	private void readClasses(String... locations) throws Exception {
 		PluginAccessor.getPlugin().getConsole().println("starting reading...");
 		long start = System.currentTimeMillis();
 		dc.readClasses(locations);
 		PluginAccessor.getPlugin().getConsole().println("...done - took " + (System.currentTimeMillis() - start) + " ms");
 		PluginAccessor.getPlugin().getConsole().println("-----------------------");
-	}
-	
-	//FIXME read all projects classes and dependencies
-	public void readClasses() {
-		PluginAccessor.getPlugin().getClassesLocations();
 	}
 	
 	private MetaPojos() {

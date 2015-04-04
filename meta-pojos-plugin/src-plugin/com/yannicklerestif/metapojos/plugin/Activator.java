@@ -1,6 +1,11 @@
 package com.yannicklerestif.metapojos.plugin;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -9,56 +14,40 @@ import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.debug.ui.console.FileLink;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.ui.console.ConsolePlugin;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IConsoleManager;
+import org.eclipse.ui.console.IPatternMatchListener;
 import org.eclipse.ui.console.MessageConsole;
 import org.eclipse.ui.console.MessageConsoleStream;
+import org.eclipse.ui.console.PatternMatchEvent;
+import org.eclipse.ui.console.TextConsole;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+
+import com.yannicklerestif.metapojos.plugin.MetaPojosHyperlinkableOutput.MetaPojosOutputPart;
 
 /**
  * The activator class controls the plug-in life cycle
  */
 public class Activator extends AbstractUIPlugin implements MetaPojosPlugin {
 
-	public static final String META_POJOS_CONSOLE_NAME = "Meta Pojos";
 	// The plug-in ID
 	public static final String PLUGIN_ID = "meta-pojos-plugin"; //$NON-NLS-1$
 
 	// The shared instance
 	private static Activator plugin;
 
-	private static class ConsoleHandle implements Console {
-
-		public MessageConsoleStream metaPojosConsoleOutputStream = null;
-
-		public ConsoleHandle(MessageConsoleStream metaPojosConsoleOutputStream) {
-			this.metaPojosConsoleOutputStream = metaPojosConsoleOutputStream;
-		}
-
-		public void println(Object message) {
-			metaPojosConsoleOutputStream.println(message == null ? "null" : message.toString());
-		}
-
-		public void println() {
-			metaPojosConsoleOutputStream.println();
-		}
-
-		public void print(Object message) {
-			metaPojosConsoleOutputStream.print(message == null ? "null" : message.toString());
-		}
-
-	}
-
-	private ConsoleHandle consoleHandle;
-
+	private MetaPojosConsole console = null;
+	
 	/**
 	 * The constructor
 	 */
@@ -73,37 +62,27 @@ public class Activator extends AbstractUIPlugin implements MetaPojosPlugin {
 		System.out.println("Plugin startup method called ---");
 		super.start(context);
 		plugin = this;
-		createConsole();
 		PluginAccessor.setPlugin(this);
+		console = MetaPojosConsole.createConsole(); 
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		IResourceChangeListener listener = new IResourceChangeListener() {
 			public void resourceChanged(IResourceChangeEvent event) {
-				System.out.println("Something changed!");
+				System.out.println(event);
 			}
 		};
 		workspace.addResourceChangeListener(listener);
+		
+		//FIXME only for testing !!
+		createTestThread();
 	}
-
-	private void createConsole() {
-		ConsolePlugin consolePlugin = ConsolePlugin.getDefault();
-		IConsoleManager conMan = consolePlugin.getConsoleManager();
-		MessageConsole myConsole = new MessageConsole(META_POJOS_CONSOLE_NAME, null);
-		conMan.addConsoles(new IConsole[] { myConsole });
-		MessageConsoleStream metaPojosConsoleOutputStream = myConsole.newMessageStream();
-		metaPojosConsoleOutputStream.setActivateOnWrite(true);
-		this.consoleHandle = new ConsoleHandle(metaPojosConsoleOutputStream);
-	}
-
+	
 	/*
 	 * (non-Javadoc)
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
 	 */
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
-		if (consoleHandle.metaPojosConsoleOutputStream.isClosed())
-			System.out.println("console stream is already closed.");
-		else
-			consoleHandle.metaPojosConsoleOutputStream.close();
+		console.closeIfNecessary();
 		super.stop(context);
 	}
 
@@ -132,67 +111,110 @@ public class Activator extends AbstractUIPlugin implements MetaPojosPlugin {
 
 	@Override
 	public Console getConsole() {
-		return consoleHandle;
+		return console;
 	}
 
 	@Override
-	public File[] getClassesLocations() {
-		IWorkspace workspace = ResourcesPlugin.getWorkspace();
-		IWorkspaceRoot root = workspace.getRoot();
-		IProject[] projects = root.getProjects();
-		for (IProject project : projects) {
-			try {
-				System.out.println("Working in project " + project.getName() + " ---------------");
+	public String[] getClassesLocations() {
+		try {
+			IWorkspace workspace = ResourcesPlugin.getWorkspace();
+			IWorkspaceRoot root = workspace.getRoot();
+			Set<String> outputLocations = new HashSet<>();
+			Set<String> librairiesLocations = new HashSet<>();
+
+			IProject[] projects = root.getProjects();
+			for (IProject project : projects) {
 				// check if we have a Java project
-				if (project.isNatureEnabled("org.eclipse.jdt.core.javanature")) {
-					IJavaProject javaProject = JavaCore.create(project);
-					IClasspathEntry[] resolvedClasspath = javaProject.getResolvedClasspath(true);
-					for (int i = 0; i < resolvedClasspath.length; i++) {
-						IClasspathEntry entry = resolvedClasspath[i];
-						String kind = "";
-						File location = null;
-						switch ((entry.getEntryKind())) {
-						case IClasspathEntry.CPE_SOURCE:
-							kind = "CPE_SOURCE";
-							IPath outputLocation = entry.getOutputLocation();
-							if(outputLocation != null)
-								//source folder has a specific output location
-								location = root.getFolder(outputLocation).getLocation().toFile();
-							else
-								//otherwise output is project default output folder
-								location = root.getFolder(javaProject.getOutputLocation()).getLocation().toFile();
-							break;
-						case IClasspathEntry.CPE_CONTAINER:
-							kind = "CPE_CONTAINER";
-							break;
-						case IClasspathEntry.CPE_LIBRARY:
-							kind = "CPE_LIBRARY";
-							IFile file = root.getFile(entry.getPath());
-							if(file.exists())
-								//location is in the workspace
-								location = file.getLocation().toFile();
-							else
-								//location is not in the workspace => should be an external library
-								location = entry.getPath().toFile(); 
-							break;
-						case IClasspathEntry.CPE_PROJECT:
-							kind = "CPE_PROJECT";
-							break;
-						case IClasspathEntry.CPE_VARIABLE:
-							kind = "CPE_VARIABLE";
-							break;
-						default:
-							break;
-						}
-						System.out.println("kind : " + kind + " - location : " + location);
+				if (project.isNatureEnabled(MetaPojosProjectNature.META_POJOS_PLUGIN_META_POJOS_NATURE)
+						|| (!(project.isNatureEnabled("org.eclipse.jdt.core.javanature"))))
+					continue;
+				IJavaProject javaProject = JavaCore.create(project);
+				IClasspathEntry[] resolvedClasspath = javaProject.getResolvedClasspath(true);
+				for (int i = 0; i < resolvedClasspath.length; i++) {
+					IClasspathEntry entry = resolvedClasspath[i];
+					if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
+						IPath outputLocation = entry.getOutputLocation();
+						if (outputLocation != null)
+							//source folder has a specific output location
+							checkAndAdd(outputLocations, root.getFolder(outputLocation).getLocation().toFile());
+						else
+							//otherwise output is project default output folder
+							checkAndAdd(outputLocations, root.getFolder(javaProject.getOutputLocation()).getLocation()
+									.toFile());
+					} else if (entry.getEntryKind() == IClasspathEntry.CPE_LIBRARY) {
+						IFile file = root.getFile(entry.getPath());
+						if (file.exists())
+							//location is in the workspace
+							checkAndAdd(librairiesLocations, file.getLocation().toFile());
+						else
+							//location is not in the workspace => should be an external library
+							checkAndAdd(librairiesLocations, entry.getPath().toFile());
+					} else if (entry.getEntryKind() == IClasspathEntry.CPE_PROJECT) {
+						//TODO right now it is not necessary to recurse into project, but it might be necessary in the future.
+						//The reason it is not necessary right now is that we analyse all projects anyway, so the project dependencies *will*
+						//be analyzed anyway. 
+					} else {
+						getConsole()
+								.println(
+										"WARNING : unsupported classpath entry in project " + project.getName() + " : "
+												+ entry);
+					}
+
+				}
+			}
+			List<String> result = new ArrayList<>();
+			result.addAll(outputLocations);
+			result.addAll(librairiesLocations);
+			return result.toArray(new String[0]);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	private void checkAndAdd(Set<String> dest, File file) {
+		if(dest.contains(file.getAbsolutePath()))
+			return;
+		if(!file.exists())
+			throw new IllegalArgumentException("File doesn't exist : " + file);
+		if(!(file.isDirectory() || file.getName().endsWith(".jar")))
+			throw new IllegalArgumentException("Unsupported file type : " + file);
+		dest.add(file.getAbsolutePath());
+	}
+	
+	@Override
+	public void output(MetaPojosHyperlinkableOutput hyperlinkableOutput) {
+		for(MetaPojosOutputPart part : hyperlinkableOutput.outputParts) {
+			//FIXME build link and then output to console 
+		}
+	}
+
+	//FIXME only for testing ! -------------------------------------------------------
+	
+	protected void createTestThread() {
+		Thread test = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				while(true) {
+					try {
+						test();
+					} catch(Exception e) {
+						e.printStackTrace();
 					}
 				}
-			} catch (CoreException e) {
-				e.printStackTrace();
 			}
-		}
-
-		return new File[] {};
+		});
+		test.start();
+	}
+	
+	protected void test() throws Exception {
+		System.in.read();
+		System.out.println("input read ---------------------------");
+		IPath path = Path.fromOSString("/home/yannick/runtime-EclipseApplication/eee/src/query/MetaPojosQuery.java");
+		IFile file = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(path);
+		FileLink fileLink = new FileLink(file, null, -1, -1, -1);
+		console.print(new Date() + " - some normal text - ");
+		console.printHyperLink("some hyperlink text", fileLink);
+		console.println(" - some more normal text");
 	}
 
 }

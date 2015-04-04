@@ -33,7 +33,8 @@ public abstract class JavaElementStream<T extends JavaElementBean, U extends Jav
 	protected abstract U wrap(Stream<T> stream);
 	
 	public void print() {
-		//TODO hyperlinks in console are broken since output is done through plugin to user console
+		//FIXME 1) add hyperlinked output for each bean
+		//FIXME 2) (here) pass it to plugin 
 		this.stream.forEach(PluginAccessor.getPlugin().getConsole()::println);
 	}
 	

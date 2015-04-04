@@ -7,6 +7,7 @@ import org.eclipse.core.runtime.CoreException;
 public class MetaPojosProjectNature implements IProjectNature {
 
 	private IProject project;
+	public static final String META_POJOS_PLUGIN_META_POJOS_NATURE = "meta-pojos-plugin.metaPojosNature";
 
 	public void configure() throws CoreException {
 	}
