@@ -73,8 +73,8 @@ public class Activator extends AbstractUIPlugin implements MetaPojosPlugin {
 		};
 		workspace.addResourceChangeListener(listener);
 		
-		//FIXME only for testing !!
-		createTestThread();
+		// only for testing !!
+		//createTestThread();
 	}
 	
 	/*
@@ -125,6 +125,8 @@ public class Activator extends AbstractUIPlugin implements MetaPojosPlugin {
 
 			IProject[] projects = root.getProjects();
 			for (IProject project : projects) {
+				if(!project.isOpen())
+					continue;
 				// check if we have a Java project
 				if (project.isNatureEnabled(MetaPojosProjectNature.META_POJOS_PLUGIN_META_POJOS_NATURE)
 						|| (!(project.isNatureEnabled("org.eclipse.jdt.core.javanature"))))
@@ -195,7 +197,7 @@ public class Activator extends AbstractUIPlugin implements MetaPojosPlugin {
 		console.println();
 	}
 
-	//FIXME only for testing ! -------------------------------------------------------
+	// only for testing ! -------------------------------------------------------
 	
 	protected void createTestThread() {
 		Thread test = new Thread(new Runnable() {
@@ -215,14 +217,7 @@ public class Activator extends AbstractUIPlugin implements MetaPojosPlugin {
 	
 	protected void test() throws Exception {
 		System.in.read();
-		System.out.println("input read ---------------------------");
-		IPath path = Path.fromOSString("/home/yannick/runtime-EclipseApplication/eee/src/query/MetaPojosQuery.java");
-		IFile file = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(path);
-		FileLink fileLink = new FileLink(file, null, -1, -1, -1);
-		console.print("some text ");
-		console.print("**");
-		console.printHyperLink(new Date() + " continued" , fileLink);
-		console.println(" some more text");
+		System.out.println("input read -------------------------------");
 	}
 
 }
