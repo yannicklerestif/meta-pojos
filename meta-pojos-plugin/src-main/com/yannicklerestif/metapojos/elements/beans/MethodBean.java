@@ -4,8 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.yannicklerestif.metapojos.DataContainer;
+import com.yannicklerestif.metapojos.plugin.MetaPojosHyperlinkedOutput;
 
-public class MethodBean implements JavaElementBean {
+public class MethodBean extends JavaElementBean {
 
 	private ClassBean classBean;
 
@@ -99,10 +100,14 @@ public class MethodBean implements JavaElementBean {
 
 	@Override
 	public String toString() {
-		return classBean.getName().replace('/', '.') + "." + name + "(" + DataContainer.classShortName(classBean.getName())
-				+ ".java:" + lineNumber + ")" + " - (" + desc + ") - " + returnType;
+		return classBean.toString() + "." + name + "(" + desc + "):" + returnType;
 	}
 
+	@Override
+	public MetaPojosHyperlinkedOutput getHyperlinkedOutput() {
+		return new MetaPojosHyperlinkedOutput().add("Method ").add(toString(), this);
+	}
+	
 	public int getLineNumber() {
 		return lineNumber;
 	}

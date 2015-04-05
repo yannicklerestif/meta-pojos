@@ -1,11 +1,12 @@
 package com.yannicklerestif.metapojos.elements.beans;
 
 import com.yannicklerestif.metapojos.DataContainer;
+import com.yannicklerestif.metapojos.plugin.MetaPojosHyperlinkedOutput;
 
-public class CallBean implements JavaElementBean {
+public class CallBean extends JavaElementBean {
 
 	private MethodBean source;
-	
+
 	private int line;
 
 	private MethodBean target;
@@ -28,12 +29,15 @@ public class CallBean implements JavaElementBean {
 	public MethodBean getTarget() {
 		return target;
 	}
-	
-	public String toString() {
-		return "Call from " + source.getClassBean().getName().replace('/', '.') + "." + source.getName() + "(" + DataContainer.classShortName(source.getClassBean().getName())
-				+ ".java:" + line + ")" + " to " + target.getClassBean().getName().replace('/', '.') + "." + target.getName() + "(" + DataContainer.classShortName(target.getClassBean().getName())
-				+ ".java:" + target.getLineNumber() + ")";
 
+	public String toString() {
+		return "Call from " + source.toString() + "(l:" + line + ") to " + target.toString();
 	}
-	
+
+	@Override
+	public MetaPojosHyperlinkedOutput getHyperlinkedOutput() {
+		return new MetaPojosHyperlinkedOutput().add("Call from ").add(source.toString() + "(l:" + line + ")", this)
+				.add(" to ").add(target.toString(), target);
+	}
+
 }

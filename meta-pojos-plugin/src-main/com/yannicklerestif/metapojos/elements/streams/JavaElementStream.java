@@ -33,9 +33,7 @@ public abstract class JavaElementStream<T extends JavaElementBean, U extends Jav
 	protected abstract U wrap(Stream<T> stream);
 	
 	public void print() {
-		//FIXME 1) add hyperlinked output for each bean
-		//FIXME 2) (here) pass it to plugin 
-		this.stream.forEach(PluginAccessor.getPlugin().getConsole()::println);
+		this.stream.forEach(element -> PluginAccessor.getPlugin().output(element.getHyperlinkedOutput()));
 	}
 	
 	public U matches(String pattern) {

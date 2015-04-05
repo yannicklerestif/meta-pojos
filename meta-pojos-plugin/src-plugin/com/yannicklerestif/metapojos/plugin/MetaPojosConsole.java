@@ -15,10 +15,34 @@ import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.ui.console.PatternMatchEvent;
 import org.eclipse.ui.console.TextConsole;
 
-//TODO clear console when executing a new query
-//TODO output hyperlinks
 public class MetaPojosConsole implements Console {
 
+	// console interface -------------------------------------------------------------------
+	
+	public void println(Object message) {
+		String toPrint = message == null ? "null" : message.toString();
+		listener.addHyperLink(toPrint, null);
+		out.println(toPrint);
+	}
+
+	public void println() {
+		out.println();
+	}
+
+	public void print(Object message) {
+		String toPrint = message == null ? "null" : message.toString();
+		listener.addHyperLink(toPrint, null);
+		out.print(toPrint);
+	}
+
+	@Override
+	public void clear() {
+		listener.clear();
+		console.clearConsole();
+	}
+	
+	//-----------------------------------------------------------------------------------
+	
 	public static final String META_POJOS_CONSOLE_NAME = "Meta Pojos";
 
 	public static MetaPojosConsole createConsole() {
@@ -43,22 +67,6 @@ public class MetaPojosConsole implements Console {
 		this.console = metaPojosConsoleOutputStream.getConsole();
 		this.listener = new MetaPojosPatternMatchListener();
 		console.addPatternMatchListener(listener);
-	}
-
-	public void println(Object message) {
-		String toPrint = message == null ? "null" : message.toString();
-		listener.addHyperLink(toPrint, null);
-		out.println(toPrint);
-	}
-
-	public void println() {
-		out.println();
-	}
-
-	public void print(Object message) {
-		String toPrint = message == null ? "null" : message.toString();
-		listener.addHyperLink(toPrint, null);
-		out.print(toPrint);
 	}
 
 	public void printHyperLink(String text, IHyperlink link) {
@@ -90,7 +98,22 @@ public class MetaPojosConsole implements Console {
 		
 		private Queue<MetaPojosHyperLink> hyperLinks = new ConcurrentLinkedQueue<>();
 		
+		public void clear() {
+			hyperLinks.clear();
+		}
+		
 		public void addHyperLink(String text, IHyperlink link) {
+			if(text.length() == 0)
+				return;
+			if(text.contains("\n")) {
+				String[] split = text.split("\n");
+				for (int i = 0; i < split.length; i++) {
+					String string = split[i];
+					addHyperLink(string, link);
+				}
+				return;
+			}  
+			//System.out.println("----- adding : ---|" + text + "|--- link : [" + link + "]");
 			hyperLinks.add(new MetaPojosHyperLink(text, link));
 		}
 		
@@ -100,24 +123,28 @@ public class MetaPojosConsole implements Console {
 				int offset = event.getOffset();
 				int length = event.getLength();
 				String text = console.getDocument().get(offset, length);
-				System.out.println("match found => " + text);
-				while(true) {
+				//System.out.println("----- match found : ---|" + text + "|---");
+				do {
 					MetaPojosHyperLink nextLink = hyperLinks.poll();
-					if(nextLink == null)
+					if(nextLink == null) {
+						System.err.println("Hyperlinks queue is empty. won't handle this text : " + text);
 						break;
+					}
 					String hyperLinkText = nextLink.hyperLinkText;
 					
 					//something wrong happened
 					if(!text.startsWith(hyperLinkText)) {
 						System.out.println("expected : " + hyperLinkText + " - got : " + text);
 						hyperLinks.clear();
+						break;
 					}
-					int length2 = hyperLinkText.length();
+					
+					int hyperLinkTextLength = hyperLinkText.length();
 					if(nextLink.link != null)
-						console.addHyperlink(nextLink.link, offset, length2);
-					text = text.substring(length2);
-					offset += length2;
-				}
+						console.addHyperlink(nextLink.link, offset, hyperLinkTextLength);
+					text = text.substring(hyperLinkTextLength);
+					offset += hyperLinkTextLength;
+				} while(text.length() > 0);
 			} catch (BadLocationException e) {
 				e.printStackTrace();
 			}

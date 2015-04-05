@@ -16,6 +16,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.wizards.JavaProjectWizard;
 
+//TODO when project is created, open editor for Query sample, preferably in the lower part of the workbench where search views are
 public class MetaPojosNewWizard extends JavaProjectWizard {
 	@Override
 	public boolean performFinish() {

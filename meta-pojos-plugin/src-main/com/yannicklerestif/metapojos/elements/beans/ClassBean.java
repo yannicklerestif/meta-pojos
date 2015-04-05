@@ -8,8 +8,9 @@ import java.util.Set;
 
 import com.yannicklerestif.metapojos.DataContainer;
 import com.yannicklerestif.metapojos.elements.beans.MethodBean.MethodBeanKey;
+import com.yannicklerestif.metapojos.plugin.MetaPojosHyperlinkedOutput;
 
-public class ClassBean implements JavaElementBean {
+public class ClassBean extends JavaElementBean {
 
 	private Map<MethodBeanKey, MethodBean> methods = new HashMap<MethodBeanKey, MethodBean>();
 
@@ -55,7 +56,12 @@ public class ClassBean implements JavaElementBean {
 	
 	@Override
 	public String toString() {
-		return name.replace('/', '.') + ".<none>(" + DataContainer.classShortName(name) + ".java:-1)";
+		return name.replace('/', '.');
+	}
+	
+	@Override
+	public MetaPojosHyperlinkedOutput getHyperlinkedOutput() {
+		return new MetaPojosHyperlinkedOutput().add("Class ").add(toString(), this);
 	}
 
 }

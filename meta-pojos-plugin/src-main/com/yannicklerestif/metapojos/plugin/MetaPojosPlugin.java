@@ -7,6 +7,6 @@ public interface MetaPojosPlugin {
 
 	public String[] getClassesLocations();
 
-	public void output(MetaPojosHyperlinkableOutput hyperlinkableOutput);
+	public void output(MetaPojosHyperlinkedOutput hyperlinkableOutput);
 
 }

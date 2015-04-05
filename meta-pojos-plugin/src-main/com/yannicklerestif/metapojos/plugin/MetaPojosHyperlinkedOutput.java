@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.yannicklerestif.metapojos.elements.beans.JavaElementBean;
 
-public class MetaPojosHyperlinkableOutput {
+public class MetaPojosHyperlinkedOutput {
 	
 	public static class MetaPojosOutputPart {
 		String text;
@@ -19,11 +19,12 @@ public class MetaPojosHyperlinkableOutput {
 	
 	List<MetaPojosOutputPart> outputParts = new ArrayList<>();
 	
-	public void add(String text) {
-		add(text, null);
+	public MetaPojosHyperlinkedOutput add(String text) {
+		return add(text, null);
 	}
 	
-	public void add(String text, JavaElementBean bean) {
+	public MetaPojosHyperlinkedOutput add(String text, JavaElementBean bean) {
 		outputParts.add(new MetaPojosOutputPart(text, bean));
+		return this;
 	}
 }

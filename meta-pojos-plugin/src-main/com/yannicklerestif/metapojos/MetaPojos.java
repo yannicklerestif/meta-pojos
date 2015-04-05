@@ -21,6 +21,7 @@ public class MetaPojos {
 	}
 	
 	public static MetaPojos start() throws Exception {
+		PluginAccessor.getPlugin().getConsole().clear();
 		PluginAccessor.getPlugin().getConsole().println("starting...");
 		long start = System.currentTimeMillis();
 		MetaPojos mp = new MetaPojos();

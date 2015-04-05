@@ -33,7 +33,8 @@ import org.eclipse.ui.console.TextConsole;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
-import com.yannicklerestif.metapojos.plugin.MetaPojosHyperlinkableOutput.MetaPojosOutputPart;
+import com.yannicklerestif.metapojos.plugin.MetaPojosConsole.MetaPojosHyperLink;
+import com.yannicklerestif.metapojos.plugin.MetaPojosHyperlinkedOutput.MetaPojosOutputPart;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -182,10 +183,16 @@ public class Activator extends AbstractUIPlugin implements MetaPojosPlugin {
 	}
 	
 	@Override
-	public void output(MetaPojosHyperlinkableOutput hyperlinkableOutput) {
+	public void output(MetaPojosHyperlinkedOutput hyperlinkableOutput) {
 		for(MetaPojosOutputPart part : hyperlinkableOutput.outputParts) {
-			//FIXME build link and then output to console 
+			if(part.bean == null)
+				console.print(part.text);
+			else {
+				MetaPojosConsoleHyperlink link = new MetaPojosConsoleHyperlink(part.bean); 
+				console.printHyperLink(part.text, link);
+			}
 		}
+		console.println();
 	}
 
 	//FIXME only for testing ! -------------------------------------------------------
@@ -212,9 +219,10 @@ public class Activator extends AbstractUIPlugin implements MetaPojosPlugin {
 		IPath path = Path.fromOSString("/home/yannick/runtime-EclipseApplication/eee/src/query/MetaPojosQuery.java");
 		IFile file = ResourcesPlugin.getWorkspace().getRoot().getFileForLocation(path);
 		FileLink fileLink = new FileLink(file, null, -1, -1, -1);
-		console.print(new Date() + " - some normal text - ");
-		console.printHyperLink("some hyperlink text", fileLink);
-		console.println(" - some more normal text");
+		console.print("some text ");
+		console.print("**");
+		console.printHyperLink(new Date() + " continued" , fileLink);
+		console.println(" some more text");
 	}
 
 }
