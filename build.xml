@@ -5,11 +5,10 @@
 	<property name="plugin.project" value="meta-pojos-plugin"/>
 	<property name="plugin.project.dist" value="${plugin.project}/dist"/>
 	<property name="samples.project" value="meta-pojos-samples"/>
-	<property name="dist" value="dist"/>
-	
+	<property name="update.site.project" value="meta-pojos-update-site"/>
 	<property name="eclipse.dropins" value="${eclipse.home}/dropins"/>
 
-	<target name="dist_for_sample_project">
+	<target name="dist_for_sample_project" description="build for sample project">
 		<delete includeemptydirs="false">
 			<fileset dir="${plugin.project.dist}"  />
 		</delete>
@@ -25,45 +24,9 @@
 		<eclipse.refreshLocal resource="meta-pojos" depth="infinite" />
 	</target>
 
-	<target name="2_wait_for_plugin_jar" description="wait for plugin jar">
-		<echo>waiting for jar file in ${dist}...</echo>
-		<waitfor maxwait="30" maxwaitunit="second" checkevery="1" checkeveryunit="second">
-			<resourcecount when="greater" count="0">
-				<fileset file="${dist}/plugins/meta-pojos-plugin*.jar" />
-			</resourcecount>
-		</waitfor>
-		<echo>...file found.</echo>
-	</target>
-
-	<target name="wait_for_feature_jar">
-		<echo>waiting for jar file in ${dist}...</echo>
-		<waitfor maxwait="30" maxwaitunit="second" checkevery="1" checkeveryunit="second">
-			<resourcecount when="greater" count="0">
-				<fileset file="${dist}/plugins/meta-pojos-plugin*.jar" />
-			</resourcecount>
-		</waitfor>
-		<echo>...file found.</echo>
-	</target>
-
-	<target name="deploy_plugin_to_dropins" description="deploy locally" depends="2_wait_for_plugin_jar">
-		<delete includeemptydirs="false">
-			<fileset dir="${eclipse.dropins}" />
-		</delete>
-		<copy todir="${eclipse.dropins}">
-			<fileset dir="${dist}/plugins">
-			</fileset>
-		</copy>
-	</target>
-
-	<target name="4_deploy_to_remote_site" description="deploy to remote site" depends="wait_for_feature_jar">
-		<ftp action="del" server="${ftp.server}" userid="${ftp.user}" password="${ftp.password}" remotedir="www/meta-pojos/p2">
-			<fileset>
-				<include name="plugins/**/*.*" />
-				<include name="features/**/*.*" />
-			</fileset>
-		</ftp>
+	<target name="deploy_to_remote_site" description="deploy to remote site">
 		<ftp server="${ftp.server}" userid="${ftp.user}" password="${ftp.password}" remotedir="www/meta-pojos/p2" depends="yes">
-			<fileset dir="dist" />
+			<fileset dir="${update.site.project}" />
 		</ftp>
 	</target>
 
