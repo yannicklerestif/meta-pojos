@@ -6,12 +6,15 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 
+import javax.management.RuntimeErrorException;
+
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.model.LaunchConfigurationDelegate;
@@ -26,6 +29,7 @@ public class MetaPojosLaunchConfigurationDelegate extends LaunchConfigurationDel
 	@Override
 	public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor)
 			throws CoreException {
+		//TODO launches are not marked as terminated  
 		String mainType = (String) configuration.getAttributes().get(
 				IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME);
 		String projectName = (String) configuration.getAttributes().get(
@@ -55,8 +59,9 @@ public class MetaPojosLaunchConfigurationDelegate extends LaunchConfigurationDel
 				e1.printStackTrace();
 			}
 			throw new RuntimeException(e);
+		} finally {
+			DebugPlugin.getDefault().getLaunchManager().removeLaunch(launch);
 		}
-
 	}
 
 }

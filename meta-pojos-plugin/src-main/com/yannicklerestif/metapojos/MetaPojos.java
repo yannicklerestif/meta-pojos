@@ -6,6 +6,7 @@ import com.yannicklerestif.metapojos.plugin.PluginAccessor;
 
 public class MetaPojos {
 
+	//FIXME documentation
 	//FIXME reorganize classes
 	//FIXME do not reload database if nothing has happened since last query
 	

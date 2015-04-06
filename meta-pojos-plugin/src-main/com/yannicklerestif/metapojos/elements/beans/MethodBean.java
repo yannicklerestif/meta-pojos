@@ -46,6 +46,11 @@ public class MethodBean extends JavaElementBean {
 		this.desc = desc;
 	}
 
+	//TODO ugly
+	public String getOriginalDesc() {
+		return "(" + desc + ")" + returnType;
+	}
+	
 	public ClassBean getClassBean() {
 		return classBean;
 	}
@@ -111,5 +116,4 @@ public class MethodBean extends JavaElementBean {
 	public int getLineNumber() {
 		return lineNumber;
 	}
-
 }

@@ -2,7 +2,6 @@ package com.yannicklerestif.metapojos.plugin;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -14,26 +13,19 @@ import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
-import org.eclipse.debug.ui.console.FileLink;
 import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.Signature;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.ui.console.ConsolePlugin;
-import org.eclipse.ui.console.IConsole;
-import org.eclipse.ui.console.IConsoleManager;
-import org.eclipse.ui.console.IPatternMatchListener;
-import org.eclipse.ui.console.MessageConsole;
-import org.eclipse.ui.console.MessageConsoleStream;
-import org.eclipse.ui.console.PatternMatchEvent;
-import org.eclipse.ui.console.TextConsole;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
-import com.yannicklerestif.metapojos.plugin.MetaPojosConsole.MetaPojosHyperLink;
 import com.yannicklerestif.metapojos.plugin.MetaPojosHyperlinkedOutput.MetaPojosOutputPart;
 
 /**
@@ -48,7 +40,7 @@ public class Activator extends AbstractUIPlugin implements MetaPojosPlugin {
 	private static Activator plugin;
 
 	private MetaPojosConsole console = null;
-	
+
 	/**
 	 * The constructor
 	 */
@@ -64,7 +56,7 @@ public class Activator extends AbstractUIPlugin implements MetaPojosPlugin {
 		super.start(context);
 		plugin = this;
 		PluginAccessor.setPlugin(this);
-		console = MetaPojosConsole.createConsole(); 
+		console = MetaPojosConsole.createConsole();
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		IResourceChangeListener listener = new IResourceChangeListener() {
 			public void resourceChanged(IResourceChangeEvent event) {
@@ -72,11 +64,11 @@ public class Activator extends AbstractUIPlugin implements MetaPojosPlugin {
 			}
 		};
 		workspace.addResourceChangeListener(listener);
-		
+
 		// only for testing !!
 		//createTestThread();
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
@@ -122,17 +114,10 @@ public class Activator extends AbstractUIPlugin implements MetaPojosPlugin {
 			IWorkspaceRoot root = workspace.getRoot();
 			Set<String> outputLocations = new HashSet<>();
 			Set<String> librairiesLocations = new HashSet<>();
+			List<IJavaProject> projects = getJavaProjects();
 
-			IProject[] projects = root.getProjects();
-			for (IProject project : projects) {
-				if(!project.isOpen())
-					continue;
-				// check if we have a Java project
-				if (project.isNatureEnabled(MetaPojosProjectNature.META_POJOS_PLUGIN_META_POJOS_NATURE)
-						|| (!(project.isNatureEnabled("org.eclipse.jdt.core.javanature"))))
-					continue;
-				IJavaProject javaProject = JavaCore.create(project);
-				IClasspathEntry[] resolvedClasspath = javaProject.getResolvedClasspath(true);
+			for (IJavaProject project : projects) {
+				IClasspathEntry[] resolvedClasspath = project.getResolvedClasspath(true);
 				for (int i = 0; i < resolvedClasspath.length; i++) {
 					IClasspathEntry entry = resolvedClasspath[i];
 					if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
@@ -142,7 +127,7 @@ public class Activator extends AbstractUIPlugin implements MetaPojosPlugin {
 							checkAndAdd(outputLocations, root.getFolder(outputLocation).getLocation().toFile());
 						else
 							//otherwise output is project default output folder
-							checkAndAdd(outputLocations, root.getFolder(javaProject.getOutputLocation()).getLocation()
+							checkAndAdd(outputLocations, root.getFolder(project.getOutputLocation()).getLocation()
 									.toFile());
 					} else if (entry.getEntryKind() == IClasspathEntry.CPE_LIBRARY) {
 						IFile file = root.getFile(entry.getPath());
@@ -157,10 +142,9 @@ public class Activator extends AbstractUIPlugin implements MetaPojosPlugin {
 						//The reason it is not necessary right now is that we analyse all projects anyway, so the project dependencies *will*
 						//be analyzed anyway. 
 					} else {
-						getConsole()
-								.println(
-										"WARNING : unsupported classpath entry in project " + project.getName() + " : "
-												+ entry);
+						getConsole().println(
+								"WARNING : unsupported classpath entry in project " + project.getProject().getName()
+										+ " : " + entry);
 					}
 
 				}
@@ -175,38 +159,75 @@ public class Activator extends AbstractUIPlugin implements MetaPojosPlugin {
 	}
 
 	private void checkAndAdd(Set<String> dest, File file) {
-		if(dest.contains(file.getAbsolutePath()))
+		if (dest.contains(file.getAbsolutePath()))
 			return;
-		if(!file.exists())
+		if (!file.exists())
 			throw new IllegalArgumentException("File doesn't exist : " + file);
-		if(!(file.isDirectory() || file.getName().endsWith(".jar")))
+		if (!(file.isDirectory() || file.getName().endsWith(".jar")))
 			throw new IllegalArgumentException("Unsupported file type : " + file);
 		dest.add(file.getAbsolutePath());
 	}
-	
+
 	@Override
 	public void output(MetaPojosHyperlinkedOutput hyperlinkableOutput) {
-		for(MetaPojosOutputPart part : hyperlinkableOutput.outputParts) {
-			if(part.bean == null)
+		for (MetaPojosOutputPart part : hyperlinkableOutput.outputParts) {
+			if (part.bean == null)
 				console.print(part.text);
 			else {
-				MetaPojosConsoleHyperlink link = new MetaPojosConsoleHyperlink(part.bean); 
+				MetaPojosConsoleHyperlink link = new MetaPojosConsoleHyperlink(part.bean);
 				console.printHyperLink(part.text, link);
 			}
 		}
 		console.println();
 	}
 
+	//------------------------------------------------------------------------------------------------
+
+	public void test1() {
+		new Runnable() {
+
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+
+			}
+		};
+
+	}
+
+	protected static List<IJavaProject> getJavaProjects() {
+		IWorkspace workspace = ResourcesPlugin.getWorkspace();
+		IWorkspaceRoot root = workspace.getRoot();
+		List<IJavaProject> javaProjects = new ArrayList<>();
+		IProject[] projects = root.getProjects();
+		for (IProject project : projects) {
+			if (!project.isOpen())
+				continue;
+			// check if we have a Java project
+			try {
+				if (project.isNatureEnabled(MetaPojosProjectNature.META_POJOS_PLUGIN_META_POJOS_NATURE)
+						|| (!(project.isNatureEnabled("org.eclipse.jdt.core.javanature"))))
+					continue;
+			} catch (CoreException e) {
+				System.err.println("Couldn't retrieve nature for project : " + project.getName());
+				e.printStackTrace();
+				continue;
+			}
+			javaProjects.add(JavaCore.create(project));
+		}
+		return javaProjects;
+	}
+
 	// only for testing ! -------------------------------------------------------
-	
+
 	protected void createTestThread() {
 		Thread test = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				while(true) {
+				while (true) {
 					try {
 						test();
-					} catch(Exception e) {
+					} catch (Exception e) {
 						e.printStackTrace();
 					}
 				}
@@ -214,10 +235,38 @@ public class Activator extends AbstractUIPlugin implements MetaPojosPlugin {
 		});
 		test.start();
 	}
-	
+
 	protected void test() throws Exception {
 		System.in.read();
 		System.out.println("input read -------------------------------");
+		List<IJavaProject> javaProjects = getJavaProjects();
+		IType type = null;
+		for (IJavaProject project : javaProjects) {
+			//			type = project.findType("test.model.SomeParameterizedClass");
+			//			type = project.findType("test.model.SomeClass");
+			//			type = project.findType("java.lang.Object");
+			type = project.findType("java.util.ArrayList");
+			//			type = project.findType("com.yannicklerestif.metapojos.MetaPojos");
+			if (type != null)
+				break;
+		}
+		if (type == null)
+			return;
+		System.out.println(type.getFullyQualifiedName());
+		IType[] types = type.getTypes();
+		for (int i = 0; i < types.length; i++) {
+			IType iType = types[i];
+			System.out.println("\t" + iType.getFullyQualifiedName());
+		}
+		System.out.println("-------------------------------------");
+		for(IMethod method : type.getMethods()) {
+			System.out.println("\t" + method.getElementName());
+			String[] parameterTypes = method.getParameterTypes();
+			for (String string : parameterTypes) {
+				System.out.println("\t\t" + Signature.getTypeErasure(string));
+			}
+		}
+
 	}
 
 }

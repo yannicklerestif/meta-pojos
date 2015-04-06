@@ -7,6 +7,7 @@ public class MyInterfaceImplChild extends MyInterfaceImpl {
 	}
 	
 	public String someMethodInMyInterfaceImplChild(Integer someInteger, MyInterface someObject) {
+		new Object().toString();
 		return null;
 	}
 }
