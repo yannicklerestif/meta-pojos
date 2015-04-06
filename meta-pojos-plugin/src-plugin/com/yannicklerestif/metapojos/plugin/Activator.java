@@ -183,18 +183,6 @@ public class Activator extends AbstractUIPlugin implements MetaPojosPlugin {
 
 	//------------------------------------------------------------------------------------------------
 
-	public void test1() {
-		new Runnable() {
-
-			@Override
-			public void run() {
-				// TODO Auto-generated method stub
-
-			}
-		};
-
-	}
-
 	protected static List<IJavaProject> getJavaProjects() {
 		IWorkspace workspace = ResourcesPlugin.getWorkspace();
 		IWorkspaceRoot root = workspace.getRoot();
