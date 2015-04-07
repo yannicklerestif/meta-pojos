@@ -3,6 +3,7 @@ package com.yannicklerestif.metapojos.plugin;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -19,6 +20,7 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.Signature;
@@ -66,7 +68,7 @@ public class Activator extends AbstractUIPlugin implements MetaPojosPlugin {
 		workspace.addResourceChangeListener(listener);
 
 		// only for testing !!
-		//createTestThread();
+		createTestThread();
 	}
 
 	/*
@@ -209,6 +211,8 @@ public class Activator extends AbstractUIPlugin implements MetaPojosPlugin {
 	// only for testing ! -------------------------------------------------------
 
 	protected void createTestThread() {
+		// only for tests !
+		if(true) return;
 		Thread test = new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -228,32 +232,38 @@ public class Activator extends AbstractUIPlugin implements MetaPojosPlugin {
 		System.in.read();
 		System.out.println("input read -------------------------------");
 		List<IJavaProject> javaProjects = getJavaProjects();
-		IType type = null;
+		IType primaryType = null;
 		for (IJavaProject project : javaProjects) {
-			//			type = project.findType("test.model.SomeParameterizedClass");
-			//			type = project.findType("test.model.SomeClass");
-			//			type = project.findType("java.lang.Object");
-			type = project.findType("java.util.ArrayList");
-			//			type = project.findType("com.yannicklerestif.metapojos.MetaPojos");
-			if (type != null)
+			primaryType = project.findType("test.model.StartingClass");
+			//			primaryType = project.findType("test.model.SomeParameterizedClass");
+			//			primaryType = project.findType("test.model.SomeClass");
+			//			primaryType = project.findType("java.lang.Object");
+//			primaryType = project.findType("java.util.ArrayList");
+//			primaryType = project.findType("java.awt.EventQueue$1AWTInvocationLock");
+			//			primaryType = project.findType("com.yannicklerestif.metapojos.MetaPojos");
+			if (primaryType != null)
 				break;
 		}
-		if (type == null)
+		if (primaryType == null)
 			return;
-		System.out.println(type.getFullyQualifiedName());
-		IType[] types = type.getTypes();
-		for (int i = 0; i < types.length; i++) {
-			IType iType = types[i];
-			System.out.println("\t" + iType.getFullyQualifiedName());
-		}
-		System.out.println("-------------------------------------");
-		for(IMethod method : type.getMethods()) {
-			System.out.println("\t" + method.getElementName());
-			String[] parameterTypes = method.getParameterTypes();
-			for (String string : parameterTypes) {
-				System.out.println("\t\t" + Signature.getTypeErasure(string));
-			}
-		}
+		System.out.println(primaryType .getFullyQualifiedName());
+	    LinkedList<IJavaElement> todo= new LinkedList<IJavaElement>();
+	    todo.add(primaryType);
+	    while (!todo.isEmpty()) {
+	        IJavaElement element= todo.removeFirst();
+
+	        if (element instanceof IType) {
+	            IType type= (IType)element;
+	            String name= type.getFullyQualifiedName();
+	            System.out.println("\t" + name);
+	        }
+
+	        if (element instanceof IParent) {
+	            for (IJavaElement child:((IParent)element).getChildren()) {
+	                todo.add(child);
+	            }
+	        }
+	    }
 
 	}
 

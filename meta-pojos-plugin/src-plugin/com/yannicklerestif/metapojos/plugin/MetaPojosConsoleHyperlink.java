@@ -13,6 +13,7 @@ package com.yannicklerestif.metapojos.plugin;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
@@ -22,10 +23,12 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.console.IHyperlink;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
@@ -61,33 +64,42 @@ public class MetaPojosConsoleHyperlink implements IHyperlink {
 
 	public void linkActivated() {
 		try {
-			IType type = findClassType(bean);
-			if (type == null) {
+			//FIXME hyperlinks don't work for constructors
+			//FIXME for cases where the exact java element cannot be resolved, use approximated line number
+			// TODO refactor to not have to do this switch
+			ClassBean classBean = null;
+			if(bean instanceof ClassBean)
+				classBean = (ClassBean) bean;
+			else if(bean instanceof MethodBean)
+				classBean = ((MethodBean) bean).getClassBean();
+			else
+				classBean = ((CallBean) bean).getSource().getClassBean();
+			
+			String enclosingTypeName = getEnclosingTypeName(classBean);
+			IType enclosingType = findType(enclosingTypeName);
+			if(enclosingType == null) {
 				noResultsFound();
 				return;
 			}
-			if (bean instanceof MethodBean) {
-				IMethod method = findMethodType(type);
-				if(method !=null)
-					JavaUI.openInEditor(method);
+
+			if (bean instanceof CallBean) {
+				openEditor(enclosingType, ((CallBean) bean).getLine());
+				return;
+			}
+			
+			IType type = findType(classBean, enclosingType);
+			if(type == null) {
+				//if type is binary, this is possible, because binary types do not have
+				//local or anonymous nested types.
+				//if type isn't binary, this is not normal
+				if(enclosingType.isBinary())
+					System.err.println("Couldn't find inner type for " + classBean.toString());
+				//defaulting to an approximate line number 
+				openEditor(enclosingType);
+				return;
 			} else {
-				IEditorPart editorPart = JavaUI.openInEditor(type);
-				if (bean instanceof ClassBean)
-					return;
-				else if (bean instanceof CallBean) {
-					int lineNumber = ((CallBean) bean).getLine();
-					if (editorPart instanceof ITextEditor && lineNumber >= 0) {
-						ITextEditor textEditor = (ITextEditor) editorPart;
-						IDocumentProvider provider = textEditor.getDocumentProvider();
-						IEditorInput editorInput = editorPart.getEditorInput();
-						provider.connect(editorInput);
-						IDocument document = provider.getDocument(editorInput);
-						IRegion line = document.getLineInformation(lineNumber);
-						textEditor.selectAndReveal(line.getOffset(), line.getLength());
-						provider.disconnect(editorInput);
-					}
-	
-				}
+				openClassOrMethod(type);
+				return;
 			}
 		} catch (Exception e) {
 			MessageDialog.openError(null, "Error opening element", "Error opening element : " + bean);
@@ -95,14 +107,118 @@ public class MetaPojosConsoleHyperlink implements IHyperlink {
 		}
 	}
 
-	private IMethod findMethodType(IType type) throws JavaModelException {
-		//FIXME some hyperlinks still don't work
-		//TODO hyperlinks don't work for constructors
-		//TODO hyperlinks don't work in anonymous classes and their methods in binary code
-		//for these cases a workaround would be to get the first line of code for the methods,
-		//and the first line of the first method for anonymous classes
-		//TODO hyperlinks don't work for nested anonymous classes and their methods
-		boolean binary = (type.getCompilationUnit() == null);
+	private void openEditor(IJavaElement javaElement, int lineNumber) throws CoreException, BadLocationException {
+		IEditorPart editorPart = JavaUI.openInEditor(javaElement);
+		if (editorPart instanceof ITextEditor && lineNumber >= 0) {
+			ITextEditor textEditor = (ITextEditor) editorPart;
+			IDocumentProvider provider = textEditor.getDocumentProvider();
+			IEditorInput editorInput = editorPart.getEditorInput();
+			provider.connect(editorInput);
+			IDocument document = provider.getDocument(editorInput);
+			IRegion line = document.getLineInformation(lineNumber);
+			textEditor.selectAndReveal(line.getOffset(), line.getLength());
+			provider.disconnect(editorInput);
+		}
+	}
+
+	private String getEnclosingTypeName(ClassBean classBean) {
+		String className = classBean.toString();
+		int pos = className.indexOf("$");
+		return pos == -1 ? className : className.substring(0, pos);
+	}
+
+	private IType findType(String typeName) throws JavaModelException {
+		List<IJavaProject> javaProjects = Activator.getJavaProjects();
+		IType result = null;
+		for (IJavaProject javaProject : javaProjects) {
+			IType type = javaProject.findType(typeName);
+			if (type == null)
+				continue;
+			if (!(type.isBinary()))
+				return type;
+			//if result is a binary type, we keep looking for a source type
+			//in the other projects
+			else
+				result = type;
+		}
+		return result;
+	}
+
+	private void noResultsFound() {
+		MessageDialog.openError(null, "Couldn't find element", "Couldn't find element : " + bean);
+	}
+
+	private static String convertToEclipseName(ClassBean classBean) {
+		//qualified name will be the same between eclipse and asm, with one difference :
+		//inner classes named something like $1SomeClass will not have the "1" in eclipse
+		String[] split = classBean.toString().split("\\$");
+		String targetClassName = split[0];
+		for (int i = 1; i < split.length; i++) {
+			String string = split[i];
+			try {
+				Integer.parseInt(string);
+				targetClassName += "$" + string;
+			} catch(NumberFormatException e) {
+				for (int j = 0; j < string.length(); j++) {
+					if(!Character.isDigit(string.charAt(j))) {
+						targetClassName += "$" + string.substring(j);
+						break;
+					}
+				}
+			}
+		}
+		return targetClassName;
+	}
+	
+	private static IType findType(ClassBean classBean, IType enclosingType) throws JavaModelException {
+		String targetClassName = convertToEclipseName(classBean);
+		
+		LinkedList<IJavaElement> todo= new LinkedList<IJavaElement>();
+		todo.add(enclosingType);
+	    while (!todo.isEmpty()) {
+	        IJavaElement element= todo.removeFirst();
+
+	        if (element instanceof IType) {
+	            IType type= (IType)element;
+	            String name= type.getFullyQualifiedName();
+	            if(name.equals(targetClassName))
+	            	return type;
+	        }
+
+	        if (element instanceof IParent) {
+	            for (IJavaElement child: ((IParent)element).getChildren()) {
+	                todo.add(child);
+	            }
+	        }
+	    }
+
+		return null;
+	}
+
+	private void openClassOrMethod(IType type) throws CoreException, BadLocationException {
+		if(bean instanceof ClassBean)
+			openEditor(type, -1);
+		else {
+			IMethod method = findMethodInType(type);
+			if(method == null) {
+				//if type is binary, it is not impossible, but very unlikely, so it's better to log.
+				//if type isn't binary, this is not normal
+				System.err.println("Could find type but not the method : " + bean);
+				//defaulting to approximate line number
+				openEditor(type);
+			} else 
+				openEditor(method, -1);
+		}
+	}
+
+	// default method if java element could not be resolved in eclipse
+	private void openEditor(IType enclosingType) throws CoreException, BadLocationException {
+		// FIXME use approximate line
+		openEditor(enclosingType, -1);
+	}
+
+	private IMethod findMethodInType(IType type) throws JavaModelException {
+		boolean binary = type.isBinary();
 		MethodBean methodBean = (MethodBean) bean;
 		IMethod[] methods = type.getMethods();
 		Type[] methodBeanParametersTypes = Type.getArgumentTypes(methodBean.getOriginalDesc());
@@ -163,105 +279,6 @@ public class MetaPojosConsoleHyperlink implements IHyperlink {
 			return method;
 		}
 		return null;
-	}
-
-	//TODO let all java element beans implement sourcebean that knows enclosing type
-	private IType findClassType(JavaElementBean bean2) {
-		ClassBean classBean = null;
-		if (bean instanceof ClassBean)
-			classBean = (ClassBean) bean;
-		else if (bean instanceof MethodBean)
-			classBean = ((MethodBean) bean).getClassBean();
-		else if (bean instanceof CallBean)
-			classBean = ((CallBean) bean).getSource().getClassBean();
-
-		//for inner types
-		//TODO for anonymous inner types this doesn't work, we must go up containing tree
-		String qualifiedName = classBean.toString();
-
-		List<IJavaProject> javaProjects = Activator.getJavaProjects();
-
-		return findTypeInProjects(qualifiedName, javaProjects);
-	}
-
-	private IType findTypeInProjects(String qualifiedName, List<IJavaProject> javaProjects) {
-		IType result = null;
-		for (IJavaProject javaProject : javaProjects) {
-			try {
-				IType type = findType(javaProject, qualifiedName);
-				if (type == null)
-					continue;
-				if (type.getCompilationUnit() != null)
-					return type;
-				//if result is a binary type, we keep looking for a source type
-				//in the other projects
-				else
-					result = type;
-			} catch (JavaModelException e) {
-				e.printStackTrace();
-				continue;
-			}
-		}
-		return result;
-	}
-
-	public static IType findType(IJavaProject javaProject, final String className) 
-	throws JavaModelException 
-	{
-	    String primaryName= className;
-	    int i= primaryName.lastIndexOf('$');
-	    int occurence= 0;
-	    if (0 < i) {
-	        try {
-	            occurence= Integer.parseInt(primaryName.substring(i+1));
-	            primaryName= primaryName.substring(0, i);
-	        }
-	        catch (NumberFormatException x) {
-	        }
-	    }
-	    
-	    /*
-	     * IJavaProject.findType works for top level classes and named inner 
-	     * classes, but not for anonymous inner classes
-	     */
-	    IType primaryType= javaProject.findType(primaryName);
-	    if(primaryType == null || !primaryType.exists())
-	        return null;
-	    if (occurence <= 0) // if not anonymous then we done
-	        return primaryType;
-
-	    /*
-	     * If we're looking for an anonymous inner class then we need to look 
-	     * through the primary type for it. 
-	     */
-	    LinkedList<IJavaElement> todo= new LinkedList<IJavaElement>();
-	    todo.add(primaryType);
-	    IType innerType= null;
-	    while (!todo.isEmpty()) {
-	        IJavaElement element= todo.removeFirst();
-
-	        if (element instanceof IType) {
-	            IType type= (IType)element;
-	            String name= type.getFullyQualifiedName();
-	            System.out.println("\t" + name);
-	            if (name.equals(className)) {
-	                innerType= type;
-	                break;
-	            }
-	        }
-
-	        if (element instanceof IParent) {
-	            for (IJavaElement child:((IParent)element).getChildren()) {
-	                todo.add(child);
-	            }
-	        }
-	    }
-
-	    return innerType;
-	}
-
-	private void noResultsFound() {
-		MessageDialog.openError(null, "Couldn't find element", "Couldn't find element : " + bean);
 	}
 
 }

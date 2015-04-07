@@ -3,7 +3,7 @@ package test.model;
 import java.util.Collection;
 import java.util.List;
 
-public class SomeParameterizedClass<T> {
+public class SomeParameterizedClass<T,U> {
 	public void doSomething(T someParameter) {
 		Object object = new Object();
 		boolean equals = object.equals(this);

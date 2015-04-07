@@ -26,9 +26,20 @@ public class StartingClass {
 
 	}
 
+	public void yetAnotherMethod() {
+		class SomeLocalClass {
+			
+		}
+	}
+	
 	public void anotherMethod() {
 		Runnable anonymousClassTest = new Runnable() {
 			public void run() {
+				class InnerClassInAnonymous {
+					public InnerClassInAnonymous(int test) {
+						
+					}
+				}
 			};
 		};
 		System.out.println(anonymousClassTest.getClass().getName());
