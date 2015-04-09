@@ -36,8 +36,13 @@ public class CallBean extends JavaElementBean {
 
 	@Override
 	public MetaPojosHyperlinkedOutput getHyperlinkedOutput() {
-		return new MetaPojosHyperlinkedOutput().add("Call from ").add(source.toString() + "(l:" + line + ")", this)
-				.add(" to ").add(target.toString(), target);
+		MetaPojosHyperlinkedOutput result = new MetaPojosHyperlinkedOutput().add("Call from ")
+				.add(source.toString() + "(l:" + line + ")", this).add(" to ");
+		if (target.isShallow())
+			result.add(target.toString() + " [shallow]");
+		else
+			result.add(target.toString(), target);
+		return result;
 	}
 
 }

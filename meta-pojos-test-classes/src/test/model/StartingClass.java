@@ -10,6 +10,14 @@ public class StartingClass {
 	}
 
 	public static class SomeStaticInnerClass {
+		public static class SomeLevel2StaticInnerClass {
+			
+		}
+		
+		public SomeStaticInnerClass() {
+			// TODO Auto-generated constructor stub
+		}
+		
 		public void someMethodInStaticInnerClass() {
 			Runnable anonymousClassTest = new Runnable() {
 				public void run() {
@@ -28,7 +36,9 @@ public class StartingClass {
 
 	public void yetAnotherMethod() {
 		class SomeLocalClass {
-			
+			SomeLocalClass(int i) {
+				
+			}
 		}
 	}
 	

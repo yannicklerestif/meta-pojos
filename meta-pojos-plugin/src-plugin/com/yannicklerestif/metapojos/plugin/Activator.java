@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
@@ -211,7 +212,7 @@ public class Activator extends AbstractUIPlugin implements MetaPojosPlugin {
 	// only for testing ! -------------------------------------------------------
 
 	protected void createTestThread() {
-		// only for tests !
+		//only for tests !
 		if(true) return;
 		Thread test = new Thread(new Runnable() {
 			@Override
@@ -231,14 +232,18 @@ public class Activator extends AbstractUIPlugin implements MetaPojosPlugin {
 	protected void test() throws Exception {
 		System.in.read();
 		System.out.println("input read -------------------------------");
+		eclipsePrint("java.util.ArrayList");
+	}
+
+	private void eclipsePrint(String string) throws JavaModelException {
 		List<IJavaProject> javaProjects = getJavaProjects();
 		IType primaryType = null;
 		for (IJavaProject project : javaProjects) {
-			primaryType = project.findType("test.model.StartingClass");
+//			primaryType = project.findType("test.model.StartingClass");
 			//			primaryType = project.findType("test.model.SomeParameterizedClass");
 			//			primaryType = project.findType("test.model.SomeClass");
 			//			primaryType = project.findType("java.lang.Object");
-//			primaryType = project.findType("java.util.ArrayList");
+			primaryType = project.findType("java.util.ArrayList");
 //			primaryType = project.findType("java.awt.EventQueue$1AWTInvocationLock");
 			//			primaryType = project.findType("com.yannicklerestif.metapojos.MetaPojos");
 			if (primaryType != null)
@@ -246,25 +251,16 @@ public class Activator extends AbstractUIPlugin implements MetaPojosPlugin {
 		}
 		if (primaryType == null)
 			return;
-		System.out.println(primaryType .getFullyQualifiedName());
-	    LinkedList<IJavaElement> todo= new LinkedList<IJavaElement>();
-	    todo.add(primaryType);
-	    while (!todo.isEmpty()) {
-	        IJavaElement element= todo.removeFirst();
+		print("",primaryType);
+	}
 
-	        if (element instanceof IType) {
-	            IType type= (IType)element;
-	            String name= type.getFullyQualifiedName();
-	            System.out.println("\t" + name);
-	        }
-
-	        if (element instanceof IParent) {
-	            for (IJavaElement child:((IParent)element).getChildren()) {
-	                todo.add(child);
-	            }
-	        }
-	    }
-
+	void print(String prefix, IJavaElement element) throws JavaModelException {
+       	System.out.println(prefix + element.getElementName() + (element instanceof IMethod ? "()" : ""));
+        if (element instanceof IParent) {
+            for (IJavaElement child: ((IParent)element).getChildren()) {
+                print(prefix + "\t", child);
+            }
+        }
 	}
 
 }

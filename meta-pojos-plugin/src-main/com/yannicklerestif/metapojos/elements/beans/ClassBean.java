@@ -17,19 +17,21 @@ public class ClassBean extends JavaElementBean {
 	private String name;
 
 	private boolean isShallow = true;
-	
+
 	private Set<ClassBean> parents = new HashSet<ClassBean>();
-	
+
 	private Set<ClassBean> children = new HashSet<ClassBean>();
-	
+
+	private int lineNumber = -1;
+
 	public void addParent(ClassBean parent) {
 		parents.add(parent);
 	}
-	
+
 	public void addChild(ClassBean child) {
 		parents.add(child);
 	}
-	
+
 	public boolean isShallow() {
 		return isShallow;
 	}
@@ -53,15 +55,32 @@ public class ClassBean extends JavaElementBean {
 	public void setName(String name) {
 		this.name = name;
 	}
-	
+
+	public int getLineNumber() {
+		return lineNumber;
+	}
+
+	public void setLineNumber(int lineNumber) {
+		this.lineNumber = lineNumber;
+	}
+
 	@Override
 	public String toString() {
 		return name.replace('/', '.');
 	}
-	
+
 	@Override
 	public MetaPojosHyperlinkedOutput getHyperlinkedOutput() {
 		return new MetaPojosHyperlinkedOutput().add("Class ").add(toString(), this);
 	}
 
+	private boolean rootOrInnerStatic = true;
+
+	public boolean isRootOrInnerStatic() {
+		return rootOrInnerStatic;
+	}
+
+	public void setRootOrInnerStatic(boolean rootOrInnerStatic) {
+		this.rootOrInnerStatic = rootOrInnerStatic;
+	}
 }

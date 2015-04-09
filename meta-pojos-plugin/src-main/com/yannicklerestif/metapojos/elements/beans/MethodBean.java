@@ -8,6 +8,16 @@ import com.yannicklerestif.metapojos.plugin.MetaPojosHyperlinkedOutput;
 
 public class MethodBean extends JavaElementBean {
 
+	private boolean shallow = true;
+	
+	public boolean isShallow() {
+		return shallow;
+	}
+
+	public void setShallow(boolean isShallow) {
+		this.shallow = isShallow;
+	}
+
 	private ClassBean classBean;
 
 	private String name;
@@ -110,7 +120,12 @@ public class MethodBean extends JavaElementBean {
 
 	@Override
 	public MetaPojosHyperlinkedOutput getHyperlinkedOutput() {
-		return new MetaPojosHyperlinkedOutput().add("Method ").add(toString(), this);
+		MetaPojosHyperlinkedOutput result = new MetaPojosHyperlinkedOutput().add("Method ");
+		if(shallow)
+			result.add(toString() + " [shallow]");
+		else
+			result.add(toString(), this);
+		return result;
 	}
 	
 	public int getLineNumber() {

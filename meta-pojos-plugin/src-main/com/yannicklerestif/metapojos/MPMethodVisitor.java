@@ -34,9 +34,13 @@ public class MPMethodVisitor extends MethodVisitor {
 
 	@Override
 	public void visitLineNumber(int line, Label start) {
-		if(currentLine == -1)
-			methodBean.setLineNumber(line);
 		currentLine = line;
+
+		//approximating line numbers for method and classes declarations
+		if(methodBean.getLineNumber() == -1)
+			methodBean.setLineNumber(line);
+		if(methodBean.getClassBean().getLineNumber() == -1)
+			methodBean.getClassBean().setLineNumber(line);
 	}
 
 }

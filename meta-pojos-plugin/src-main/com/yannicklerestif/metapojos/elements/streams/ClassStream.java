@@ -3,6 +3,7 @@ package com.yannicklerestif.metapojos.elements.streams;
 import java.util.stream.Stream;
 
 import com.yannicklerestif.metapojos.elements.beans.ClassBean;
+import com.yannicklerestif.metapojos.elements.beans.MethodBean;
 
 public class ClassStream extends JavaElementStream<ClassBean, ClassStream> {
 
@@ -10,8 +11,11 @@ public class ClassStream extends JavaElementStream<ClassBean, ClassStream> {
 	//TODO getRecursiveDerivedClasses
 	//TODO getBaseClasses
 	//TODO getRecursiveBaseClasses
+	//TODO getMethods(boolean includeInherited)
 	//TODO getReferences
 	//TODO getReferrers
+
+	//TODO do not include shallow classes ?
 	
 	public MethodStream getMethods() {
 		return new MethodStream(stream.flatMap(classBean -> classBean.getMethods().values().stream()));
@@ -22,10 +26,10 @@ public class ClassStream extends JavaElementStream<ClassBean, ClassStream> {
 	public ClassStream(Stream<ClassBean> stream) {
 		super(stream);
 	}
-	
+
 	@Override
 	protected ClassStream wrap(Stream<ClassBean> stream) {
 		return new ClassStream(stream);
 	}
-	
+
 }

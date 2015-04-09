@@ -10,10 +10,14 @@
  *******************************************************************************/
 package com.yannicklerestif.metapojos.plugin;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.IInitializer;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
@@ -21,6 +25,7 @@ import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.internal.core.JavaElement;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.BadLocationException;
@@ -28,10 +33,10 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.console.IHyperlink;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
 import com.yannicklerestif.metapojos.elements.beans.CallBean;
@@ -64,8 +69,6 @@ public class MetaPojosConsoleHyperlink implements IHyperlink {
 
 	public void linkActivated() {
 		try {
-			//FIXME hyperlinks don't work for constructors
-			//FIXME for cases where the exact java element cannot be resolved, use approximated line number
 			// TODO refactor to not have to do this switch
 			ClassBean classBean = null;
 			if(bean instanceof ClassBean)
@@ -92,7 +95,7 @@ public class MetaPojosConsoleHyperlink implements IHyperlink {
 				//if type is binary, this is possible, because binary types do not have
 				//local or anonymous nested types.
 				//if type isn't binary, this is not normal
-				if(enclosingType.isBinary())
+				if(!(enclosingType.isBinary()))
 					System.err.println("Couldn't find inner type for " + classBean.toString());
 				//defaulting to an approximate line number 
 				openEditor(enclosingType);
@@ -118,7 +121,7 @@ public class MetaPojosConsoleHyperlink implements IHyperlink {
 			IRegion line = document.getLineInformation(lineNumber);
 			textEditor.selectAndReveal(line.getOffset(), line.getLength());
 			provider.disconnect(editorInput);
-		}
+		} 
 	}
 
 	private String getEnclosingTypeName(ClassBean classBean) {
@@ -199,44 +202,95 @@ public class MetaPojosConsoleHyperlink implements IHyperlink {
 		if(bean instanceof ClassBean)
 			openEditor(type, -1);
 		else {
-			IMethod method = findMethodInType(type);
-			if(method == null) {
+			IJavaElement element = findMethodInType(type);
+			if(element == null) {
 				//if type is binary, it is not impossible, but very unlikely, so it's better to log.
 				//if type isn't binary, this is not normal
 				System.err.println("Could find type but not the method : " + bean);
 				//defaulting to approximate line number
 				openEditor(type);
 			} else 
-				openEditor(method, -1);
+				//note : element can be a class if the method is an implicit constructor
+				openEditor(element, -1);
 		}
 	}
 
 	// default method if java element could not be resolved in eclipse
 	private void openEditor(IType enclosingType) throws CoreException, BadLocationException {
-		// FIXME use approximate line
-		openEditor(enclosingType, -1);
+		System.err.println("defaulting to approximate line number");
+		int lineNumber;
+		if(bean instanceof ClassBean) {
+			//TODO explain
+			lineNumber = ((ClassBean) bean).getLineNumber();
+		} else {
+			//TODO explain
+			lineNumber = ((MethodBean) bean).getLineNumber();
+			if(lineNumber >0)
+				lineNumber--;
+		}
+		if(lineNumber < 0) {
+			lineNumber = -1;
+			System.err.println("no valid line number found in java element : " + bean.toString());
+		}
+		openEditor(enclosingType, lineNumber);
 	}
 
-	private IMethod findMethodInType(IType type) throws JavaModelException {
-		boolean binary = type.isBinary();
+	private static IType getParent(IJavaElement element) {
+		IJavaElement parent = element.getParent();
+		if(parent == null)
+			return null;
+		if(parent instanceof IType)
+			return (IType) parent;
+		return getParent(parent);
+	}
+	
+	private IJavaElement findMethodInType(IType type) throws JavaModelException {
 		MethodBean methodBean = (MethodBean) bean;
-		IMethod[] methods = type.getMethods();
-		Type[] methodBeanParametersTypes = Type.getArgumentTypes(methodBean.getOriginalDesc());
-		String[] methodBeanParameters = new String[methodBeanParametersTypes.length];
-		for (int i = 0; i < methodBeanParametersTypes.length; i++) {
-			methodBeanParameters[i] = methodBeanParametersTypes[i].toString().replace("/", ".").replace("$", ".");
+		String methodBeanName = null;
+		boolean isConstructor = methodBean.getName().equals("<init>");
+		if(isConstructor)
+			methodBeanName = type.getElementName();
+		else
+			methodBeanName = methodBean.getName();
+		List<Type> methodBeanParametersTypes = new ArrayList<>();
+		Collections.addAll(methodBeanParametersTypes, Type.getArgumentTypes(methodBean.getOriginalDesc()));
+		List<String> methodBeanParametersNames = new ArrayList<>();
+		for (Type methodBeanType : methodBeanParametersTypes) {
+			methodBeanParametersNames.add(methodBeanType.toString().replace("/", ".").replace("$", "."));
 		}
+		
+		//if class is nested and is not static, first argument (in .class files) is the parent class
+		if(isConstructor && !(methodBean.getClassBean().isRootOrInnerStatic())) {
+			methodBeanParametersTypes.remove(0);
+			methodBeanParametersNames.remove(0);
+		}
+
+		boolean binary = type.isBinary();
+		IMethod[] methods = type.getMethods();
+
+		//if there is no constructor in eclipse, then we most probably hold the default constructor
+		//this includes the cases where type is anonymous (in this case constructor is always implicit
+		//because class has no name, so the constructor cannot be declared)
+		if(isConstructor) {
+			int constructorsNumber = 0;
+			for (int i = 0; i < methods.length; i++)
+				if(methods[i].getElementName().equals(methodBeanName))
+					constructorsNumber++;
+			if(constructorsNumber == 0)
+				return type;
+		}
+		
 		methods: for (int i = 0; i < methods.length; i++) {
 			IMethod method = methods[i];
-			if (!(method.getElementName().equals(methodBean.getName())))
+			if (!(method.getElementName().equals(methodBeanName)))
 				continue;
 			String[] parameterTypes = method.getParameterTypes();
-			if (parameterTypes.length != methodBeanParameters.length)
+			if (parameterTypes.length != methodBeanParametersNames.size())
 				continue;
 			//at this point length are identical, we must now check types are identical.
 			for (int j = 0; j < parameterTypes.length; j++) {
 				String eclipseParameterType = Signature.getTypeErasure(parameterTypes[j]);
-				String beanParameterType = methodBeanParameters[j];
+				String beanParameterType = methodBeanParametersNames.get(j);
 				int eclipseArrayCount = Signature.getArrayCount(eclipseParameterType);
 				String eclipseElementType = Signature.getElementType(eclipseParameterType);
 				int beanArrayCount = Signature.getArrayCount(beanParameterType);
@@ -278,6 +332,7 @@ public class MetaPojosConsoleHyperlink implements IHyperlink {
 			//we when through all parameters and all were ok => this is the method
 			return method;
 		}
+
 		return null;
 	}
 
