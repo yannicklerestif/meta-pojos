@@ -86,7 +86,7 @@ public class MetaPojosConsoleHyperlink implements IHyperlink {
 			}
 
 			if (bean instanceof CallBean) {
-				openEditor(enclosingType, ((CallBean) bean).getLine());
+				openEditor(enclosingType, ((CallBean) bean).getLine() - 1);
 				return;
 			}
 			
