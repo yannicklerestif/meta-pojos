@@ -29,6 +29,8 @@ public class MetaPojosLaunchConfigurationDelegate extends LaunchConfigurationDel
 	@Override
 	public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor)
 			throws CoreException {
+		//FIXME in case of InvocationTargetException, throw the original exception
+		//(otherwise user doesn't have the exception message)
 		//TODO launches are not marked as terminated  
 		String mainType = (String) configuration.getAttributes().get(
 				IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME);

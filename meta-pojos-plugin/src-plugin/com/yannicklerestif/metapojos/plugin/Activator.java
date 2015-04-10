@@ -2,7 +2,9 @@ package com.yannicklerestif.metapojos.plugin;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -116,6 +118,7 @@ public class Activator extends AbstractUIPlugin implements MetaPojosPlugin {
 			IWorkspace workspace = ResourcesPlugin.getWorkspace();
 			IWorkspaceRoot root = workspace.getRoot();
 			Set<String> outputLocations = new HashSet<>();
+			Set<String> skipped = new HashSet<>();
 			Set<String> librairiesLocations = new HashSet<>();
 			List<IJavaProject> projects = getJavaProjects();
 
@@ -127,19 +130,19 @@ public class Activator extends AbstractUIPlugin implements MetaPojosPlugin {
 						IPath outputLocation = entry.getOutputLocation();
 						if (outputLocation != null)
 							//source folder has a specific output location
-							checkAndAdd(outputLocations, root.getFolder(outputLocation).getLocation().toFile());
+							checkAndAdd(outputLocations, skipped, root.getFolder(outputLocation).getLocation().toFile());
 						else
 							//otherwise output is project default output folder
-							checkAndAdd(outputLocations, root.getFolder(project.getOutputLocation()).getLocation()
+							checkAndAdd(outputLocations, skipped, root.getFolder(project.getOutputLocation()).getLocation()
 									.toFile());
 					} else if (entry.getEntryKind() == IClasspathEntry.CPE_LIBRARY) {
 						IFile file = root.getFile(entry.getPath());
 						if (file.exists())
 							//location is in the workspace
-							checkAndAdd(librairiesLocations, file.getLocation().toFile());
+							checkAndAdd(librairiesLocations, skipped, file.getLocation().toFile());
 						else
 							//location is not in the workspace => should be an external library
-							checkAndAdd(librairiesLocations, entry.getPath().toFile());
+							checkAndAdd(librairiesLocations, skipped, entry.getPath().toFile());
 					} else if (entry.getEntryKind() == IClasspathEntry.CPE_PROJECT) {
 						//TODO right now it is not necessary to recurse into project, but it might be necessary in the future.
 						//The reason it is not necessary right now is that we analyse all projects anyway, so the project dependencies *will*
@@ -152,6 +155,15 @@ public class Activator extends AbstractUIPlugin implements MetaPojosPlugin {
 
 				}
 			}
+			
+			//TODO return skipped instead of printing it ?
+			List<String> skippedSorted = new ArrayList<>();
+			skippedSorted.addAll(skipped);
+			Collections.sort(skippedSorted);
+			for (String string : skippedSorted) {
+				console.println("WARN : location skipped : " + string);
+			}
+			
 			List<String> result = new ArrayList<>();
 			result.addAll(outputLocations);
 			result.addAll(librairiesLocations);
@@ -161,13 +173,17 @@ public class Activator extends AbstractUIPlugin implements MetaPojosPlugin {
 		}
 	}
 
-	private void checkAndAdd(Set<String> dest, File file) {
+	private void checkAndAdd(Set<String> dest, Set<String> skipped, File file) {
 		if (dest.contains(file.getAbsolutePath()))
 			return;
-		if (!file.exists())
-			throw new IllegalArgumentException("File doesn't exist : " + file);
-		if (!(file.isDirectory() || file.getName().endsWith(".jar")))
-			throw new IllegalArgumentException("Unsupported file type : " + file);
+		if (!file.exists()) {
+			skipped.add("File doesn't exist : " + file);
+			return;
+		}
+		if (!(file.isDirectory() || file.getName().endsWith(".jar"))) {
+			skipped.add("Unsupported file type : " + file);
+			return;
+		}
 		dest.add(file.getAbsolutePath());
 	}
 
