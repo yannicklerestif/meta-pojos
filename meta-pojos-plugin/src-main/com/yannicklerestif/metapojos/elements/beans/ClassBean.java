@@ -14,7 +14,7 @@ public class ClassBean extends JavaElementBean {
 
 	private Map<MethodBeanKey, MethodBean> methods = new HashMap<MethodBeanKey, MethodBean>();
 
-	private String name;
+	private String internalName;
 
 	private boolean isShallow = true;
 
@@ -48,12 +48,12 @@ public class ClassBean extends JavaElementBean {
 		this.methods = methods;
 	}
 
-	public String getName() {
-		return name;
+	public String getInternalName() {
+		return internalName;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setInternalName(String name) {
+		this.internalName = name;
 	}
 
 	public int getLineNumber() {
@@ -64,9 +64,13 @@ public class ClassBean extends JavaElementBean {
 		this.lineNumber = lineNumber;
 	}
 
+	public String getPrettyName() {
+		return internalName.replace('/', '.');
+	}
+	
 	@Override
 	public String toString() {
-		return name.replace('/', '.');
+		return getPrettyName();
 	}
 
 	@Override

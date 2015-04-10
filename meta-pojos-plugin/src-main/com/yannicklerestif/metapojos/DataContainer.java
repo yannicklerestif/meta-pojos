@@ -62,7 +62,7 @@ public class DataContainer {
 		ClassBean classBean = classes.get(name);
 		if (classBean == null) {
 			classBean = new ClassBean();
-			classBean.setName(name);
+			classBean.setInternalName(name);
 			classes.put(name, classBean);
 		}
 		return classBean;

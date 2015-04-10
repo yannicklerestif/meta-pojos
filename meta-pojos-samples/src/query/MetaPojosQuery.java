@@ -9,6 +9,6 @@ public class MetaPojosQuery {
 		//		mp.singleClass(ClassBean.class.getName()).getMethods().matches("<init>").getCallsTo().print();
 		//		mp.singleClass("test.model.hierarchy.MyInterface").getMethods().getCallsTo().print();
 //		MetaPojos.getConsole().println(mp.allClasses().stream().count());
-		mp.singleClass("com.yannicklerestif.metapojos.elements.beans.MethodBean").getMethods().matches("getClassBean").getCallsTo().print();
+		mp.singleClass("com.yannicklerestif.metapojos.elements.beans.MethodBean").getMethods().matches("toString").getCallsTo().print();
 	}
 }

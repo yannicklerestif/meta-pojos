@@ -11,21 +11,20 @@
 package com.yannicklerestif.metapojos.plugin;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jdt.core.IInitializer;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IParent;
+import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.internal.core.JavaElement;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.BadLocationException;
@@ -36,13 +35,14 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.console.IHyperlink;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
-import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
 import com.yannicklerestif.metapojos.elements.beans.CallBean;
 import com.yannicklerestif.metapojos.elements.beans.ClassBean;
 import com.yannicklerestif.metapojos.elements.beans.JavaElementBean;
 import com.yannicklerestif.metapojos.elements.beans.MethodBean;
+import com.yannicklerestif.metapojos.elements.beans.MethodBean.MethodArgument;
+import com.yannicklerestif.metapojos.elements.beans.MethodBean.MethodDesc;
 
 /**
  * A hyper-link from a stack trace line of the form "*(*.java:*)"
@@ -110,7 +110,7 @@ public class MetaPojosConsoleHyperlink implements IHyperlink {
 		}
 	}
 
-	private void openEditor(IJavaElement javaElement, int lineNumber) throws CoreException, BadLocationException {
+	private void openEditor(IJavaElement javaElement, int lineNumber) throws CoreException {
 		IEditorPart editorPart = JavaUI.openInEditor(javaElement);
 		if (editorPart instanceof ITextEditor && lineNumber >= 0) {
 			ITextEditor textEditor = (ITextEditor) editorPart;
@@ -118,9 +118,16 @@ public class MetaPojosConsoleHyperlink implements IHyperlink {
 			IEditorInput editorInput = editorPart.getEditorInput();
 			provider.connect(editorInput);
 			IDocument document = provider.getDocument(editorInput);
-			IRegion line = document.getLineInformation(lineNumber);
-			textEditor.selectAndReveal(line.getOffset(), line.getLength());
-			provider.disconnect(editorInput);
+			IRegion line;
+			try {
+				line = document.getLineInformation(lineNumber);
+				textEditor.selectAndReveal(line.getOffset(), line.getLength());
+			} catch (BadLocationException e) {
+				//TODO characterize the case when we don't find the line because no source file was found
+				//(and in this case do not look the line up)
+			} finally {
+				provider.disconnect(editorInput);
+			}
 		} 
 	}
 
@@ -221,12 +228,10 @@ public class MetaPojosConsoleHyperlink implements IHyperlink {
 		int lineNumber;
 		if(bean instanceof ClassBean) {
 			//TODO explain
-			lineNumber = ((ClassBean) bean).getLineNumber();
+			lineNumber = ((ClassBean) bean).getLineNumber() - 1;
 		} else {
 			//TODO explain
-			lineNumber = ((MethodBean) bean).getLineNumber();
-			if(lineNumber >0)
-				lineNumber--;
+			lineNumber = ((MethodBean) bean).getLineNumber() - 2;
 		}
 		if(lineNumber < 0) {
 			lineNumber = -1;
@@ -235,43 +240,27 @@ public class MetaPojosConsoleHyperlink implements IHyperlink {
 		openEditor(enclosingType, lineNumber);
 	}
 
-	private static IType getParent(IJavaElement element) {
-		IJavaElement parent = element.getParent();
-		if(parent == null)
-			return null;
-		if(parent instanceof IType)
-			return (IType) parent;
-		return getParent(parent);
-	}
-	
 	private IJavaElement findMethodInType(IType type) throws JavaModelException {
 		MethodBean methodBean = (MethodBean) bean;
 		String methodBeanName = null;
-		boolean isConstructor = methodBean.getName().equals("<init>");
-		if(isConstructor)
+		MethodDesc args = methodBean.getMethodDesc();
+		if(args.isConstructor)
 			methodBeanName = type.getElementName();
 		else
 			methodBeanName = methodBean.getName();
-		List<Type> methodBeanParametersTypes = new ArrayList<>();
-		Collections.addAll(methodBeanParametersTypes, Type.getArgumentTypes(methodBean.getOriginalDesc()));
-		List<String> methodBeanParametersNames = new ArrayList<>();
-		for (Type methodBeanType : methodBeanParametersTypes) {
-			methodBeanParametersNames.add(methodBeanType.toString().replace("/", ".").replace("$", "."));
-		}
-		
-		//if class is nested and is not static, first argument (in .class files) is the parent class
-		if(isConstructor && !(methodBean.getClassBean().isRootOrInnerStatic())) {
-			methodBeanParametersTypes.remove(0);
-			methodBeanParametersNames.remove(0);
-		}
 
 		boolean binary = type.isBinary();
+		
+		//if class is nested and is not static, first argument (in .class files) is the parent class
+		if(!binary && args.isConstructor && !(methodBean.getClassBean().isRootOrInnerStatic()))
+			args.arguments.remove(0);
+
 		IMethod[] methods = type.getMethods();
 
 		//if there is no constructor in eclipse, then we most probably hold the default constructor
 		//this includes the cases where type is anonymous (in this case constructor is always implicit
 		//because class has no name, so the constructor cannot be declared)
-		if(isConstructor) {
+		if(!binary && args.isConstructor) {
 			int constructorsNumber = 0;
 			for (int i = 0; i < methods.length; i++)
 				if(methods[i].getElementName().equals(methodBeanName))
@@ -285,22 +274,24 @@ public class MetaPojosConsoleHyperlink implements IHyperlink {
 			if (!(method.getElementName().equals(methodBeanName)))
 				continue;
 			String[] parameterTypes = method.getParameterTypes();
-			if (parameterTypes.length != methodBeanParametersNames.size())
+			if (parameterTypes.length != args.arguments.size())
 				continue;
 			//at this point length are identical, we must now check types are identical.
 			for (int j = 0; j < parameterTypes.length; j++) {
 				String eclipseParameterType = Signature.getTypeErasure(parameterTypes[j]);
-				String beanParameterType = methodBeanParametersNames.get(j);
-				int eclipseArrayCount = Signature.getArrayCount(eclipseParameterType);
 				String eclipseElementType = Signature.getElementType(eclipseParameterType);
-				int beanArrayCount = Signature.getArrayCount(beanParameterType);
-				String beanElementType = Signature.getElementType(beanParameterType);
+				int eclipseArrayCount = Signature.getArrayCount(eclipseParameterType);
+
+				MethodArgument arg = args.arguments.get(j);
+				String beanElementType = arg.getDottedElementTypeName();
+				int beanArrayCount = arg.arrayCount;
 
 				//getting rid of array nesting
 				if (beanArrayCount != eclipseArrayCount)
 					continue methods;
 
-				//getting rid of primitive types and binary "normal"(not parameterized) types
+				//- primitive types are the same in eclipse and asm
+				//- unparameterized types are the same in eclipse and asm when they are binary
 				if (eclipseElementType.equals(beanElementType))
 					continue;
 
@@ -330,6 +321,13 @@ public class MetaPojosConsoleHyperlink implements IHyperlink {
 				}
 			}
 			//we when through all parameters and all were ok => this is the method
+			//one special case : for binary classes, implicit constructors will exist in eclipse java model,
+			//but then it won't be able to find the associated source => we target the type instead
+			if(binary && args.isConstructor ) {
+				ISourceRange sourceRange = method.getSourceRange();
+				if(sourceRange == null || sourceRange.getLength() < 0 || sourceRange.getOffset() < 0)
+					return type;
+			}
 			return method;
 		}
 

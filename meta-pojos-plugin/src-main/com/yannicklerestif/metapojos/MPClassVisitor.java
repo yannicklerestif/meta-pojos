@@ -57,7 +57,7 @@ public class MPClassVisitor extends ClassVisitor {
 
 	@Override
 	public void visitInnerClass(String name, String outerName, String innerName, int access) {
-		if(classBean.getName().equals(name) && ((access & Opcodes.ACC_STATIC) == 0))
+		if(classBean.getInternalName().equals(name) && ((access & Opcodes.ACC_STATIC) == 0))
 			classBean.setRootOrInnerStatic(false);
 	}
 	
@@ -68,11 +68,11 @@ public class MPClassVisitor extends ClassVisitor {
 		if((Opcodes.ACC_BRIDGE & access) > 0 || (Opcodes.ACC_SYNTHETIC & access) > 0)
 			return null;
 		
-		if(GET_DEBUGGED_CLASS() != null && classBean.getName().startsWith(GET_DEBUGGED_CLASS()))
-			System.out.println("\t" + Integer.toBinaryString(access) + " " + classBean.getName() + " - " + name + " - " + desc);
+		if(GET_DEBUGGED_CLASS() != null && classBean.getInternalName().startsWith(GET_DEBUGGED_CLASS()))
+			System.out.println("\t" + Integer.toBinaryString(access) + " " + classBean.getInternalName() + " - " + name + " - " + desc);
 		
 		String[] splitDesc = dc.splitDesc(desc);
-		MethodBean methodBean = dc.getOrCreateMethodBean(classBean.getName(), name, splitDesc[0]);
+		MethodBean methodBean = dc.getOrCreateMethodBean(classBean.getInternalName(), name, splitDesc[0]);
 		methodBean.setReturnType(splitDesc[1]);
 		methodBean.setShallow(false);
 		return new MPMethodVisitor(dc, methodBean);
@@ -80,7 +80,7 @@ public class MPClassVisitor extends ClassVisitor {
 	
 	@Override
 	public void visitEnd() {
-		if(GET_DEBUGGED_CLASS() != null && classBean.getName().startsWith(GET_DEBUGGED_CLASS()))
+		if(GET_DEBUGGED_CLASS() != null && classBean.getInternalName().startsWith(GET_DEBUGGED_CLASS()))
 			System.out.println("\t=>" + classBean.isRootOrInnerStatic());
 	}
 	

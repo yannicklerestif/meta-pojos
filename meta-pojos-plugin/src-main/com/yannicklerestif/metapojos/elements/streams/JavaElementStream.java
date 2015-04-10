@@ -40,14 +40,6 @@ public abstract class JavaElementStream<T extends JavaElementBean, U extends Jav
 	public void print() {
 		this.stream.forEach(element -> {
 			PluginAccessor.getPlugin().output(element.getHyperlinkedOutput());
-			if(!(element instanceof ClassBean))
-				return;
-			ClassBean classBean = (ClassBean) element;
-			System.out.println(classBean.toString());
-			Collection<MethodBean> methods = classBean.getMethods().values();
-			for (MethodBean methodBean : methods) {
-				System.out.println("\t" + methodBean.toString() + "[shallow:" + methodBean.isShallow() + "]");
-			}
 		});
 	}
 
