@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature url="features/com.yannicklerestif.metapojos.feature_1.1.0.201504102024.jar" id="com.yannicklerestif.metapojos.feature" version="1.1.0.201504102024">
+   <feature url="features/com.yannicklerestif.metapojos.feature_1.1.0.201504110016.jar" id="com.yannicklerestif.metapojos.feature" version="1.1.0.201504110016">
       <category name="meta-pojos"/>
    </feature>
    <category-def name="meta-pojos" label="meta-pojos"/>

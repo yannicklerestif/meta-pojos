@@ -11,7 +11,6 @@ public class MetaPojos {
 	//FIXME do not reload database if nothing has happened since last query
 	//FIXME tycho
 	//TODO plugin dependencies 
-	
 	//TODO Data container must be moved to plugin 
 	private DataContainer dc;
 
