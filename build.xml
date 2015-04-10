@@ -9,6 +9,7 @@
 	<property name="eclipse.dropins" value="${eclipse.home}/dropins"/>
 
 	<target name="dist_for_sample_project" description="build for sample project">
+		<mkdir dir="${plugin.project.dist}"/>
 		<delete includeemptydirs="false">
 			<fileset dir="${plugin.project.dist}"  />
 		</delete>
