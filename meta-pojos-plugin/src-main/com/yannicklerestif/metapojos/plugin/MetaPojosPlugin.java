@@ -1,12 +1,12 @@
 package com.yannicklerestif.metapojos.plugin;
 
+import com.yannicklerestif.metapojos.model.DataContainer;
+
 
 public interface MetaPojosPlugin {
 
-	public Console getConsole();
+	public MetaPojosConsole getConsole();
 
-	public String[] getClassesLocations();
-
-	public void output(MetaPojosHyperlinkedOutput hyperlinkableOutput);
+	public DataContainer getDataContainer();
 
 }

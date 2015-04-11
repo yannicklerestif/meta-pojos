@@ -1,14 +1,11 @@
-package com.yannicklerestif.metapojos.elements.beans;
+package com.yannicklerestif.metapojos.model.elements.beans;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.yannicklerestif.metapojos.DataContainer;
-import com.yannicklerestif.metapojos.elements.beans.MethodBean.MethodBeanKey;
-import com.yannicklerestif.metapojos.plugin.MetaPojosHyperlinkedOutput;
+import com.yannicklerestif.metapojos.model.elements.beans.MethodBean.MethodBeanKey;
 
 public class ClassBean extends JavaElementBean {
 
@@ -71,11 +68,6 @@ public class ClassBean extends JavaElementBean {
 	@Override
 	public String toString() {
 		return getPrettyName();
-	}
-
-	@Override
-	public MetaPojosHyperlinkedOutput getHyperlinkedOutput() {
-		return new MetaPojosHyperlinkedOutput().add("Class ").add(toString(), this);
 	}
 
 	private boolean rootOrInnerStatic = true;

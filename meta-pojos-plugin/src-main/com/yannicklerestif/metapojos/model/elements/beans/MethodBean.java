@@ -1,12 +1,10 @@
-package com.yannicklerestif.metapojos.elements.beans;
+package com.yannicklerestif.metapojos.model.elements.beans;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jdt.core.Signature;
 import org.objectweb.asm.Type;
-
-import com.yannicklerestif.metapojos.plugin.MetaPojosHyperlinkedOutput;
 
 public class MethodBean extends JavaElementBean {
 
@@ -212,16 +210,6 @@ public class MethodBean extends JavaElementBean {
 		MethodArgument returnType2 = new MethodArgument(Type.getReturnType(getInternalDesc()));
 		builder.append("):").append(returnType2.getPrettyIdentifier());
 		return builder.toString();
-	}
-
-	@Override
-	public MetaPojosHyperlinkedOutput getHyperlinkedOutput() {
-		MetaPojosHyperlinkedOutput result = new MetaPojosHyperlinkedOutput().add("Method ");
-		if (shallow)
-			result.add(getPrettyName() + " [shallow]");
-		else
-			result.add(getPrettyName(), this);
-		return result;
 	}
 
 	public int getLineNumber() {

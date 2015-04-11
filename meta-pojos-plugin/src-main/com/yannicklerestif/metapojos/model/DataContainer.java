@@ -1,4 +1,4 @@
-package com.yannicklerestif.metapojos;
+package com.yannicklerestif.metapojos.model;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -13,10 +13,10 @@ import java.util.zip.ZipFile;
 
 import org.objectweb.asm.ClassReader;
 
-import com.yannicklerestif.metapojos.elements.beans.ClassBean;
-import com.yannicklerestif.metapojos.elements.beans.MethodBean;
-import com.yannicklerestif.metapojos.elements.beans.MethodBean.MethodBeanKey;
-import com.yannicklerestif.metapojos.elements.streams.ClassStream;
+import com.yannicklerestif.metapojos.model.elements.beans.ClassBean;
+import com.yannicklerestif.metapojos.model.elements.beans.MethodBean;
+import com.yannicklerestif.metapojos.model.elements.beans.MethodBean.MethodBeanKey;
+import com.yannicklerestif.metapojos.model.elements.streams.ClassStream;
 
 public class DataContainer {
 
@@ -26,11 +26,11 @@ public class DataContainer {
 	// container
 	// ------------------------------------------------------------------------------------
 
-	public ClassStream allClasses() {
+	public ClassStream getAllClasses() {
 		return new ClassStream(classes.values().stream());
 	}
 
-	public ClassStream singleClass(String className) {
+	public ClassStream getSingleClass(String className) {
 		ClassBean classBean = classes.get(className.replace('.', '/'));
 		return new ClassStream(classBean == null ? Stream.empty() : Stream.of(classBean));
 	}
@@ -138,10 +138,6 @@ public class DataContainer {
 		ClassReader cr = new ClassReader(stream);
 		MPClassVisitor visitor = new MPClassVisitor(this);
 		cr.accept(visitor, 0);
-		// ClassNode cn = new ClassNode();
-		// cr.accept(cn, 0);
-		// if (cn.name.contains("StartingClass"))
-		// System.out.println(cn.name);
 	}
 
 }

@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package com.yannicklerestif.metapojos.plugin;
+package com.yannicklerestif.metapojos.plugin.project;
 
  
 import java.lang.reflect.InvocationTargetException;

@@ -1,4 +1,4 @@
-package com.yannicklerestif.metapojos.plugin;
+package com.yannicklerestif.metapojos.plugin.project;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectNature;

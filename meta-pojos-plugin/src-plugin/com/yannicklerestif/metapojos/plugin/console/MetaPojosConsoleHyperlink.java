@@ -1,17 +1,5 @@
-/*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- *     IBM Corporation - initial API and implementation
- *******************************************************************************/
-package com.yannicklerestif.metapojos.plugin;
+package com.yannicklerestif.metapojos.plugin.console;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -21,7 +9,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.core.ISourceRange;
-import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
@@ -35,23 +22,23 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.console.IHyperlink;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
-import org.objectweb.asm.Type;
 
-import com.yannicklerestif.metapojos.elements.beans.CallBean;
-import com.yannicklerestif.metapojos.elements.beans.ClassBean;
-import com.yannicklerestif.metapojos.elements.beans.JavaElementBean;
-import com.yannicklerestif.metapojos.elements.beans.MethodBean;
-import com.yannicklerestif.metapojos.elements.beans.MethodBean.MethodArgument;
-import com.yannicklerestif.metapojos.elements.beans.MethodBean.MethodDesc;
+import com.yannicklerestif.metapojos.model.elements.beans.CallBean;
+import com.yannicklerestif.metapojos.model.elements.beans.ClassBean;
+import com.yannicklerestif.metapojos.model.elements.beans.JavaElementBean;
+import com.yannicklerestif.metapojos.model.elements.beans.MethodBean;
+import com.yannicklerestif.metapojos.model.elements.beans.MethodBean.MethodArgument;
+import com.yannicklerestif.metapojos.model.elements.beans.MethodBean.MethodDesc;
+import com.yannicklerestif.metapojos.plugin.MetaPojosPluginImpl;
+import com.yannicklerestif.metapojos.plugin.MetaPojosWorkspace;
 
-/**
- * A hyper-link from a stack trace line of the form "*(*.java:*)"
- */
 public class MetaPojosConsoleHyperlink implements IHyperlink {
 
 	private JavaElementBean bean;
+	private MetaPojosWorkspace workspace;
 
-	public MetaPojosConsoleHyperlink(JavaElementBean bean) {
+	public MetaPojosConsoleHyperlink(MetaPojosWorkspace workspace, JavaElementBean bean) {
+		this.workspace = workspace;
 		this.bean = bean;
 	}
 
@@ -96,7 +83,7 @@ public class MetaPojosConsoleHyperlink implements IHyperlink {
 				//local or anonymous nested types.
 				//if type isn't binary, this is not normal
 				if(!(enclosingType.isBinary()))
-					System.err.println("Couldn't find inner type for " + classBean.toString());
+					System.err.println("Couldn't find inner type for " + classBean.getInternalName());
 				//defaulting to an approximate line number 
 				openEditor(enclosingType);
 				return;
@@ -132,13 +119,13 @@ public class MetaPojosConsoleHyperlink implements IHyperlink {
 	}
 
 	private String getEnclosingTypeName(ClassBean classBean) {
-		String className = classBean.toString();
+		String className = classBean.getInternalName().replace('/', '.');
 		int pos = className.indexOf("$");
 		return pos == -1 ? className : className.substring(0, pos);
 	}
 
 	private IType findType(String typeName) throws JavaModelException {
-		List<IJavaProject> javaProjects = Activator.getJavaProjects();
+		List<IJavaProject> javaProjects = workspace.getJavaProjects();
 		IType result = null;
 		for (IJavaProject javaProject : javaProjects) {
 			IType type = javaProject.findType(typeName);

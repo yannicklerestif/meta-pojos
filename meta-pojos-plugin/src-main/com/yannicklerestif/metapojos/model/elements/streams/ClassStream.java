@@ -1,9 +1,9 @@
-package com.yannicklerestif.metapojos.elements.streams;
+package com.yannicklerestif.metapojos.model.elements.streams;
 
 import java.util.stream.Stream;
 
-import com.yannicklerestif.metapojos.elements.beans.ClassBean;
-import com.yannicklerestif.metapojos.elements.beans.MethodBean;
+import com.yannicklerestif.metapojos.model.elements.beans.ClassBean;
+import com.yannicklerestif.metapojos.model.elements.beans.MethodBean;
 
 public class ClassStream extends JavaElementStream<ClassBean, ClassStream> {
 

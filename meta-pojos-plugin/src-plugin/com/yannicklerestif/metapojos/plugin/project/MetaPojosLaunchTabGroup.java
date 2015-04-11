@@ -1,4 +1,4 @@
-package com.yannicklerestif.metapojos.plugin;
+package com.yannicklerestif.metapojos.plugin.project;
 
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTabGroup;
 import org.eclipse.debug.ui.CommonTab;

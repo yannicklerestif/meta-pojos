@@ -1,6 +1,6 @@
-package com.yannicklerestif.metapojos.elements.streams;
+package com.yannicklerestif.metapojos.model.elements.streams;
 
-import com.yannicklerestif.metapojos.elements.beans.JavaElementBean;
+import com.yannicklerestif.metapojos.model.elements.beans.JavaElementBean;
 
 public class StreamPath<T extends JavaElementBean> {
 	private StreamPath previousSteps;

@@ -1,8 +1,8 @@
-package com.yannicklerestif.metapojos.elements.streams;
+package com.yannicklerestif.metapojos.model.elements.streams;
 
 import java.util.stream.Stream;
 
-import com.yannicklerestif.metapojos.elements.beans.CallBean;
+import com.yannicklerestif.metapojos.model.elements.beans.CallBean;
 
 public class CallStream extends JavaElementStream<CallBean, CallStream> {
 

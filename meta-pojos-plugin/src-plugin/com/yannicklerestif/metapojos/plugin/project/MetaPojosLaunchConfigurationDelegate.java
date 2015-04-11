@@ -1,12 +1,13 @@
-package com.yannicklerestif.metapojos.plugin;
+package com.yannicklerestif.metapojos.plugin.project;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
-
-import javax.management.RuntimeErrorException;
 
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -22,6 +23,9 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 
+import com.yannicklerestif.metapojos.plugin.MetaPojosPluginImpl;
+import com.yannicklerestif.metapojos.plugin.PluginAccessor;
+
 public class MetaPojosLaunchConfigurationDelegate extends LaunchConfigurationDelegate {
 
 	public static final String LAUNCHER_ID = "com.yannicklerestif.metapojos.Launcher";
@@ -29,24 +33,31 @@ public class MetaPojosLaunchConfigurationDelegate extends LaunchConfigurationDel
 	@Override
 	public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor)
 			throws CoreException {
-		//FIXME in case of InvocationTargetException, throw the original exception
-		//(otherwise user doesn't have the exception message)
 		//TODO launches are not marked as terminated  
 		String mainType = (String) configuration.getAttributes().get(
 				IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME);
 		String projectName = (String) configuration.getAttributes().get(
 				IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME);
 		IJavaProject project = JavaCore.create(ResourcesPlugin.getWorkspace().getRoot().getProject(projectName));
-		
+
 		IPath path = project.getOutputLocation();
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 		IFolder folder = root.getFolder(path);
 		File outputLocation = folder.getLocation().toFile();
-		
+
 		Class clazz = null;
 		URLClassLoader cl = null;
+		MetaPojosPluginImpl plugin = (MetaPojosPluginImpl) PluginAccessor.getPlugin();
 
 		try {
+
+			plugin.getConsole().clear();
+			plugin.getConsole().println("starting...");
+			long start = System.currentTimeMillis();
+			plugin.prepareDataContainer();
+			plugin.getConsole().println("...started - took " + (System.currentTimeMillis() - start) + " ms");
+			plugin.getConsole().println("-----------------------");
+
 			URL url = outputLocation.toURI().toURL();
 			cl = new URLClassLoader(new URL[] { url }, Thread.currentThread().getContextClassLoader());
 			clazz = cl.loadClass(mainType);
@@ -60,7 +71,14 @@ public class MetaPojosLaunchConfigurationDelegate extends LaunchConfigurationDel
 				//we do not want to hide the original exception
 				e1.printStackTrace();
 			}
-			throw new RuntimeException(e);
+			e.printStackTrace();
+			Throwable toPrint = e;
+			if(e instanceof InvocationTargetException)
+				toPrint = e.getCause();
+			StringWriter errors = new StringWriter();
+			toPrint.printStackTrace(new PrintWriter(errors));
+			plugin.getConsole().println("Error launching query :");
+			plugin.getConsole().println(errors.toString());
 		} finally {
 			DebugPlugin.getDefault().getLaunchManager().removeLaunch(launch);
 		}

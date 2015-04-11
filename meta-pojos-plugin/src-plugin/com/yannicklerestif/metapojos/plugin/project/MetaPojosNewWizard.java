@@ -1,4 +1,4 @@
-package com.yannicklerestif.metapojos.plugin;
+package com.yannicklerestif.metapojos.plugin.project;
 
 import java.io.InputStream;
 import java.net.URL;

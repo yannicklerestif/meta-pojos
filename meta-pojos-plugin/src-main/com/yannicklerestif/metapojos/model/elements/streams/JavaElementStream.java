@@ -1,4 +1,4 @@
-package com.yannicklerestif.metapojos.elements.streams;
+package com.yannicklerestif.metapojos.model.elements.streams;
 
 import java.util.Collection;
 import java.util.Comparator;
@@ -10,10 +10,10 @@ import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
-import com.yannicklerestif.metapojos.elements.beans.ClassBean;
-import com.yannicklerestif.metapojos.elements.beans.JavaElementBean;
-import com.yannicklerestif.metapojos.elements.beans.MethodBean;
-import com.yannicklerestif.metapojos.elements.beans.MethodBean.MethodBeanKey;
+import com.yannicklerestif.metapojos.model.elements.beans.ClassBean;
+import com.yannicklerestif.metapojos.model.elements.beans.JavaElementBean;
+import com.yannicklerestif.metapojos.model.elements.beans.MethodBean;
+import com.yannicklerestif.metapojos.model.elements.beans.MethodBean.MethodBeanKey;
 import com.yannicklerestif.metapojos.plugin.PluginAccessor;
 
 public abstract class JavaElementStream<T extends JavaElementBean, U extends JavaElementStream<T, U>> {
@@ -39,7 +39,7 @@ public abstract class JavaElementStream<T extends JavaElementBean, U extends Jav
 
 	public void print() {
 		this.stream.forEach(element -> {
-			PluginAccessor.getPlugin().output(element.getHyperlinkedOutput());
+			PluginAccessor.getPlugin().getConsole().printJavaElementBean(element);
 		});
 	}
 

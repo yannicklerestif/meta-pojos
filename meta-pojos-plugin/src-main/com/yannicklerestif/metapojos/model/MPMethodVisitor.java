@@ -1,11 +1,11 @@
-package com.yannicklerestif.metapojos;
+package com.yannicklerestif.metapojos.model;
 
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
-import com.yannicklerestif.metapojos.elements.beans.CallBean;
-import com.yannicklerestif.metapojos.elements.beans.MethodBean;
+import com.yannicklerestif.metapojos.model.elements.beans.CallBean;
+import com.yannicklerestif.metapojos.model.elements.beans.MethodBean;
 
 public class MPMethodVisitor extends MethodVisitor {
 

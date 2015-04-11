@@ -3,32 +3,6 @@
 <plugin>
 
    <extension
-         point="org.eclipse.ui.views">
-      <category
-            name="Sample Category"
-            id="meta-pojos-plugin">
-      </category>
-      <view
-            name="Sample View"
-            icon="icons/sample.gif"
-            category="meta-pojos-plugin"
-            class="com.yannicklerestif.metapojos.plugin.SampleView"
-            id="com.yannicklerestif.metapojos.SampleView">
-      </view>
-   </extension>
-   <extension
-         point="org.eclipse.ui.perspectiveExtensions">
-      <perspectiveExtension
-            targetID="org.eclipse.jdt.ui.JavaPerspective">
-         <view
-               ratio="0.5"
-               relative="org.eclipse.ui.views.ProblemView"
-               relationship="right"
-               id="com.yannicklerestif.metapojos.SampleView">
-         </view>
-      </perspectiveExtension>
-   </extension>
-   <extension
          point="org.eclipse.help.contexts">
       <contexts
             file="contexts.xml">
@@ -37,7 +11,7 @@
 	<extension point="org.eclipse.debug.core.launchConfigurationTypes">
 	    <launchConfigurationType
 	        name="Meta Pojos Query"
-	        delegate="com.yannicklerestif.metapojos.plugin.MetaPojosLaunchConfigurationDelegate"
+	        delegate="com.yannicklerestif.metapojos.plugin.project.MetaPojosLaunchConfigurationDelegate"
 	        modes="run"               
 	        id="com.yannicklerestif.metapojos.Launcher">        
 	    </launchConfigurationType>
@@ -52,7 +26,7 @@
 	<extension point="org.eclipse.debug.ui.launchConfigurationTabGroups">
 	    <launchConfigurationTabGroup
 	        type="com.yannicklerestif.metapojos.Launcher"
-	        class="com.yannicklerestif.metapojos.plugin.MetaPojosLaunchTabGroup"
+	        class="com.yannicklerestif.metapojos.plugin.project.MetaPojosLaunchTabGroup"
 	        id="com.yannicklerestif.metapojos.launcherTabGroup">
 	    </launchConfigurationTabGroup>
 	</extension>
@@ -60,7 +34,7 @@
 	    <shortcut
 	        id="com.yannicklerestif.metapojos.LauncherShortcut"
 	        icon="icons/mp.gif"
-	        class="com.yannicklerestif.metapojos.plugin.MetaPojosLaunchShortcut"
+	        class="com.yannicklerestif.metapojos.plugin.project.MetaPojosLaunchShortcut"
 	        label="Meta Pojos Query"
 	        modes="run">
 	        <contextualLaunch>
@@ -74,7 +48,7 @@
       id="metaPojosNature"
       name="Meta Pojos Nature">
       <runtime>
-         <run class="com.yannicklerestif.metapojos.plugin.MetaPojosProjectNature">
+         <run class="com.yannicklerestif.metapojos.plugin.project.MetaPojosProjectNature">
          </run>
       </runtime>
     </extension>
@@ -94,17 +68,19 @@
 	    </category>
 	    <wizard
 	          category="meta-pojos-plugin.category2"
-	          class="com.yannicklerestif.metapojos.plugin.MetaPojosNewWizard"
+	          class="com.yannicklerestif.metapojos.plugin.project.MetaPojosNewWizard"
 	          icon="icons/mp.gif"
 	          id="meta-pojos-plugin.wizard2"
 	          name="Meta Pojos"
 	          project="true">
 	    </wizard>
 	</extension>
-    <!--inutile pour l'instant-->
+    <!--  not necessary right now -->
+    <!-- 
     <extension
           point="org.eclipse.ui.startup">
        <startup
              class="com.yannicklerestif.metapojos.plugin.MetaPojosEarlyStartup"></startup>
     </extension>
+    -->
 </plugin>
