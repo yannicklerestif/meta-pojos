@@ -13,8 +13,8 @@ import com.yannicklerestif.metapojos.plugin.debug.DebuggerOutput;
  */
 public class MetaPojosPluginImpl extends AbstractUIPlugin implements MetaPojosPlugin {
 
-	//FIXME only in dev !
-	public static final boolean DEBUG_MODE = true;
+	//only in dev !
+	public static final boolean DEBUG_MODE = false;
 	
 	// The plug-in ID
 	public static final String PLUGIN_ID = "meta-pojos-plugin"; //$NON-NLS-1$
