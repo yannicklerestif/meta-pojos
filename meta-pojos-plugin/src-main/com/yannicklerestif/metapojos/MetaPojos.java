@@ -6,11 +6,11 @@ import com.yannicklerestif.metapojos.plugin.PluginAccessor;
 
 public class MetaPojos {
 
-	public static ClassStream getAllClasses() {
+	public static ClassStream getClasses() {
 		return PluginAccessor.getPlugin().getDataContainer().getAllClasses();
 	}
 	
-	public static ClassStream getClassesByName(String className) {
+	public static ClassStream getClasses(String className) {
 		return PluginAccessor.getPlugin().getDataContainer().getAllClasses().filterByName(className);
 	}
 	

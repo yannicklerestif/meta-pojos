@@ -25,7 +25,7 @@ public class ClassStream extends JavaElementStream<ClassBean, ClassStream> {
 		return new MethodStream(stream.flatMap(classBean -> classBean.getMethods().values().stream()));
 	}
 
-	public MethodStream getMethodsByName(String methodName) {
+	public MethodStream getMethods(String methodName) {
 		return getMethods().streamFilter(methodBean -> methodBean.getName().contains(methodName));
 	}
 	
