@@ -6,6 +6,10 @@ import com.yannicklerestif.metapojos.model.elements.beans.CallBean;
 
 public class CallStream extends JavaElementStream<CallBean, CallStream> {
 
+	public MethodStream getSource() {
+		return new MethodStream(stream.map(callBean -> callBean.getSource()));
+	}
+	
 	public MethodStream getTarget() {
 		return new MethodStream(stream.map(callBean -> callBean.getTarget()));
 	}

@@ -30,11 +30,6 @@ public class DataContainer {
 		return new ClassStream(classes.values().stream());
 	}
 
-	public ClassStream getSingleClass(String className) {
-		ClassBean classBean = classes.get(className.replace('.', '/'));
-		return new ClassStream(classBean == null ? Stream.empty() : Stream.of(classBean));
-	}
-
 	public static String classShortName(String className) {
 		return className.substring(className.lastIndexOf('/') + 1);
 	}

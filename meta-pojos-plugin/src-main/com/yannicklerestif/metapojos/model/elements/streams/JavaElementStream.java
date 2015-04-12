@@ -13,10 +13,6 @@ import com.yannicklerestif.metapojos.plugin.PluginAccessor;
 
 public abstract class JavaElementStream<T extends JavaElementBean, U extends JavaElementStream<T, U>> {
 
-	//FIXME rename and reorganize methods
-	// - filterByXXX (filterByName,...) for filtering methods
-	// - streamXXX (streamSorted, streamUnique...) for methods delegating to underlying stream
-	// - add a boolean to print => print(classifiedNamesInClassParameters)
 	//TODO Javadoc for methods in JavaElementStream and child classes
 
 	protected Stream<T> stream;
@@ -38,10 +34,6 @@ public abstract class JavaElementStream<T extends JavaElementBean, U extends Jav
 		});
 	}
 
-	public U matches(String pattern) {
-		return filter(sourceObject -> sourceObject.toString().contains(pattern));
-	}
-
 	public U recursive(UnaryOperator<U> operation) {
 		Set<T> startingStock = new HashSet<T>();
 		Set<T> newElements = new HashSet<T>();
@@ -55,7 +47,7 @@ public abstract class JavaElementStream<T extends JavaElementBean, U extends Jav
 
 	private void applyRecursively(Set<T> previousStock, Set<T> previousNewElements, UnaryOperator<U> operation) {
 		Set<T> newElements = new HashSet<T>();
-		operation.apply(wrap(previousNewElements.stream())).foreach(sourceObject -> {
+		operation.apply(wrap(previousNewElements.stream())).streamForeach(sourceObject -> {
 			if (!(previousStock.contains(sourceObject))) {
 				newElements.add(sourceObject);
 				previousStock.add(sourceObject);
@@ -67,15 +59,15 @@ public abstract class JavaElementStream<T extends JavaElementBean, U extends Jav
 
 	//-------------------------------------------- stream methods ----------------------------------------
 
-	public U filter(Predicate<? super T> predicate) {
+	public U streamFilter(Predicate<? super T> predicate) {
 		return wrap(stream.filter(predicate));
 	}
 
-	public void foreach(Consumer<? super T> action) {
+	public void streamForeach(Consumer<? super T> action) {
 		stream.forEach(action);
 	}
 
-	public U sorted() {
+	public U streamSorted() {
 		return wrap(stream.sorted(Comparator.comparing(sourceObject -> sourceObject.toString())));
 	}
 

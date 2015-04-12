@@ -15,7 +15,6 @@ public class StartingClass {
 		}
 		
 		public SomeStaticInnerClass() {
-			// TODO Auto-generated constructor stub
 		}
 		
 		public void someMethodInStaticInnerClass() {

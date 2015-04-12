@@ -20,7 +20,7 @@ import com.yannicklerestif.metapojos.plugin.PluginAccessor;
 public class DebuggerOutput {
 
 	private boolean DEBUG_MODE() {
-		//only in dev !
+		//set to true only in dev !
 		return false;
 	}
 
@@ -65,8 +65,12 @@ public class DebuggerOutput {
 	}
 	
 	public void debugEvent(IResourceChangeEvent event, boolean force) {
-		if (!force && !(DEBUG_EVENTS()))
-			return;
+		if(!force) {
+			if(!(DEBUG_MODE()))
+				return;
+			if(!(DEBUG_EVENTS()))
+				return;
+		}
 		System.out.println("---------------------------------");
 		System.out.println(new Date());
 		System.out.println("POST_CHANGE event : " + (((event.getType() & IResourceChangeEvent.POST_CHANGE) > 0) ? "TRUE" : ""));

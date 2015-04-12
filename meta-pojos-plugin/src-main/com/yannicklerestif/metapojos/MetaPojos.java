@@ -10,8 +10,8 @@ public class MetaPojos {
 		return PluginAccessor.getPlugin().getDataContainer().getAllClasses();
 	}
 	
-	public static ClassStream getSingleClass(String className) {
-		return PluginAccessor.getPlugin().getDataContainer().getSingleClass(className);
+	public static ClassStream getClassesByName(String className) {
+		return PluginAccessor.getPlugin().getDataContainer().getAllClasses().filterByName(className);
 	}
 	
 	public static MetaPojosConsole getConsole() {

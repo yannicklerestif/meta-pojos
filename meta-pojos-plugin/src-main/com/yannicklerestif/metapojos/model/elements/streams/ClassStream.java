@@ -17,10 +17,18 @@ public class ClassStream extends JavaElementStream<ClassBean, ClassStream> {
 
 	//TODO do not include shallow classes ?
 	
+	public ClassStream filterByName(String name) {
+		return streamFilter(classBean -> classBean.getPrettyName().contains(name));
+	}
+	
 	public MethodStream getMethods() {
 		return new MethodStream(stream.flatMap(classBean -> classBean.getMethods().values().stream()));
 	}
 
+	public MethodStream getMethodsByName(String methodName) {
+		return getMethods().streamFilter(methodBean -> methodBean.getName().contains(methodName));
+	}
+	
 	//---------------------------------------------------------------
 
 	public ClassStream(Stream<ClassBean> stream) {

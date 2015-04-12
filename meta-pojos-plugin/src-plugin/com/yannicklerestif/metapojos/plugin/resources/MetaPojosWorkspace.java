@@ -74,6 +74,7 @@ public class MetaPojosWorkspace {
 					dcm.setDirty();
 					return;
 				} catch (CoreException e) {
+					//TODO this happens when project was deleted => check it instead of catching an exception
 					dcm.setDirty();
 					System.err.println("Error retrieving project nature for project " + project);
 					e.printStackTrace();
