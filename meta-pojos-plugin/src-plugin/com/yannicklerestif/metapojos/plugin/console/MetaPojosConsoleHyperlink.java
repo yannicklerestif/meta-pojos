@@ -30,7 +30,7 @@ import com.yannicklerestif.metapojos.model.elements.beans.MethodBean;
 import com.yannicklerestif.metapojos.model.elements.beans.MethodBean.MethodArgument;
 import com.yannicklerestif.metapojos.model.elements.beans.MethodBean.MethodDesc;
 import com.yannicklerestif.metapojos.plugin.MetaPojosPluginImpl;
-import com.yannicklerestif.metapojos.plugin.MetaPojosWorkspace;
+import com.yannicklerestif.metapojos.plugin.resources.MetaPojosWorkspace;
 
 public class MetaPojosConsoleHyperlink implements IHyperlink {
 
@@ -148,7 +148,7 @@ public class MetaPojosConsoleHyperlink implements IHyperlink {
 	private static String convertToEclipseName(ClassBean classBean) {
 		//qualified name will be the same between eclipse and asm, with one difference :
 		//inner classes named something like $1SomeClass will not have the "1" in eclipse
-		String[] split = classBean.toString().split("\\$");
+		String[] split = classBean.getPrettyName().split("\\$");
 		String targetClassName = split[0];
 		for (int i = 1; i < split.length; i++) {
 			String string = split[i];

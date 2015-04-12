@@ -7,14 +7,18 @@ import org.osgi.framework.BundleContext;
 import com.yannicklerestif.metapojos.model.DataContainer;
 import com.yannicklerestif.metapojos.plugin.console.MetaPojosConsoleImpl;
 import com.yannicklerestif.metapojos.plugin.debug.DebuggerOutput;
+import com.yannicklerestif.metapojos.plugin.resources.DataContainerManager;
+import com.yannicklerestif.metapojos.plugin.resources.MetaPojosWorkspace;
 
 /**
  * The activator class controls the plug-in life cycle
  */
 public class MetaPojosPluginImpl extends AbstractUIPlugin implements MetaPojosPlugin {
 
-	//only in dev !
-	public static final boolean DEBUG_MODE = false;
+	//FIXME documentation
+	//TODO tycho
+	//TODO plugin dependencies 
+	//TODO replace System.out by eclipse logging facility
 	
 	// The plug-in ID
 	public static final String PLUGIN_ID = "meta-pojos-plugin"; //$NON-NLS-1$
@@ -47,12 +51,12 @@ public class MetaPojosPluginImpl extends AbstractUIPlugin implements MetaPojosPl
 		plugin = this;
 		PluginAccessor.setPlugin(this);
 		console = MetaPojosConsoleImpl.createConsole(this);
-		workspace = new MetaPojosWorkspace(this).init();
+		workspace = new MetaPojosWorkspace();
 		dcm = new DataContainerManager(workspace);
+		workspace.init(this, dcm);
 		
 		// only for testing !!
-		if(DEBUG_MODE)
-			new DebuggerOutput(this).createTestThread();
+		DebuggerOutput.init(this);
 	}
 
 	/*

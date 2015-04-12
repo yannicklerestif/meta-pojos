@@ -40,7 +40,7 @@ public class MPClassVisitor extends ClassVisitor {
 		classBean.setShallow(false);
 
 		if(GET_DEBUGGED_CLASS() != null && name.startsWith(GET_DEBUGGED_CLASS()))
-			System.out.println(classBean.toString());
+			System.out.println(classBean.getPrettyName());
 
 		//if class is java.lang.Object, superName is null
 		if(superName != null) {

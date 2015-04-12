@@ -23,7 +23,7 @@ public class StartingClass {
 				public void run() {
 					Runnable anonymousClassTest = new Runnable() {
 						public void run() {
-							
+							//...
 						};
 					};
 					

@@ -1,24 +1,19 @@
 package com.yannicklerestif.metapojos.model.elements.streams;
 
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
-import com.yannicklerestif.metapojos.model.elements.beans.ClassBean;
 import com.yannicklerestif.metapojos.model.elements.beans.JavaElementBean;
-import com.yannicklerestif.metapojos.model.elements.beans.MethodBean;
-import com.yannicklerestif.metapojos.model.elements.beans.MethodBean.MethodBeanKey;
 import com.yannicklerestif.metapojos.plugin.PluginAccessor;
 
 public abstract class JavaElementStream<T extends JavaElementBean, U extends JavaElementStream<T, U>> {
 
-	// TODO rename and reorganize methods
+	//FIXME rename and reorganize methods
 	// - filterByXXX (filterByName,...) for filtering methods
 	// - streamXXX (streamSorted, streamUnique...) for methods delegating to underlying stream
 	// - add a boolean to print => print(classifiedNamesInClassParameters)

@@ -6,11 +6,6 @@ import com.yannicklerestif.metapojos.plugin.PluginAccessor;
 
 public class MetaPojos {
 
-	//FIXME documentation
-	//FIXME do not reload database if nothing has happened since last query
-	//FIXME tycho
-	//TODO plugin dependencies 
-
 	public static ClassStream getAllClasses() {
 		return PluginAccessor.getPlugin().getDataContainer().getAllClasses();
 	}
