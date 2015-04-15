@@ -1,0 +1,7 @@
+<project name="synchronize documentation" basedir=".">
+
+	<target name="sync-stop" description="stop synchronizing doc folder with remote ftp">
+		<exec executable="./sync-stop.sh"/>
+	</target>
+
+</project>

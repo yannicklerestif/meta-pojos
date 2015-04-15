@@ -31,4 +31,10 @@
 		</ftp>
 	</target>
 
+	<target name="sync-start" description="start synchronizing doc folder with remote ftp">
+		<exec executable="./sync-start.sh">
+		</exec>
+	</target>
+
+
 </project>

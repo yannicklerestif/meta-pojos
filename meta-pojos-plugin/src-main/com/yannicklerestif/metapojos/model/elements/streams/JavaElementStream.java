@@ -13,6 +13,7 @@ import com.yannicklerestif.metapojos.plugin.PluginAccessor;
 
 public abstract class JavaElementStream<T extends JavaElementBean, U extends JavaElementStream<T, U>> {
 
+	//TODO print results if query terminates but streams are not closed ?
 	//TODO Javadoc for methods in JavaElementStream and child classes
 
 	protected Stream<T> stream;

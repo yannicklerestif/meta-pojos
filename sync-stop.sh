@@ -1,0 +1,1 @@
+kill $(ps -e | grep inotifywait | awk '{print $1}')

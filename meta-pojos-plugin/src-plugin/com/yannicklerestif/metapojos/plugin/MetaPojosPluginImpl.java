@@ -16,7 +16,6 @@ import com.yannicklerestif.metapojos.plugin.resources.MetaPojosWorkspace;
  */
 public class MetaPojosPluginImpl extends AbstractUIPlugin implements MetaPojosPlugin {
 
-	//FIXME documentation
 	//TODO tycho
 	//TODO plugin dependencies 
 	//TODO replace System.out by eclipse logging facility

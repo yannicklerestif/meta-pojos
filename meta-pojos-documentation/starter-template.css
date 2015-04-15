@@ -1,0 +1,62 @@
+body {
+	padding-top: 50px;
+	counter-reset: h1counter;
+}
+
+.starter-template {
+	padding: 0px 8px;
+	text-align: left;
+	max-width: 850px;
+}
+
+[class*="col-"] {
+	padding-right: 8px;
+	padding-left: 8px;
+	padding-bottom: 0px;
+	padding-top: 0px;
+}
+
+h1:before {
+	content: counter(h1counter) ".\0000a0";
+	counter-increment: h1counter;
+}
+
+h1.nocount:before {
+	content: none;
+	counter-increment: none;
+}
+
+h1 {
+	counter-reset: h2counter;
+}
+
+h1.nocount {
+	counter-reset: none;
+}
+
+h2:before {
+	content: counter(h1counter) "." counter(h2counter) ".\0000a0";
+	counter-increment: h2counter;
+}
+
+h2 {
+	counter-reset: h3counter;
+}
+
+h3:before {
+	content: counter(h1counter) "." counter(h2counter) "." counter(h3counter) ".\0000a0";
+	counter-increment: h3counter;
+}
+
+code {
+  color: #333333;
+  background-color: #f5f5f5;
+  border: 1px solid #e0e0e0;
+  border-radius: 0px;
+}
+
+img {
+	border-color: #e0e0e0;
+	border-width: 3px;
+	border-style: solid;
+}
