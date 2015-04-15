@@ -1,9 +1,9 @@
 # meta-pojos
 ## What is it ?
 Meta Pojos is an eclipse plugin hat allows you to browse your Java code.
-The querying is done in Java, allowing you to use your favorite IDE for content assist. For example, to get all calls to all methods containing `get` in classes whose name contains `DAO` you can do this :
+The querying is done in Java, allowing you to use your favorite IDE for content assist. For example, to get all calls to all methods whose names contain `get` in all classes whose name contains `DAO` you can do this :
 ```java
-mp.allClasses().filter(clazz -> (clazz.getName().contains("DAO")).getMethods().getCallsTo();
+MetaPojos.getClasses("DAO").getMethods("get").getCallsTo().print();
 ```
 The results appear in a special console that has hyperlinks to places in your code :
 
