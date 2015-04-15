@@ -3,14 +3,20 @@ package com.yannicklerestif.metapojos.model;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.nio.file.Files;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
 import org.objectweb.asm.ClassReader;
 
 import com.yannicklerestif.metapojos.model.elements.beans.ClassBean;
@@ -19,6 +25,8 @@ import com.yannicklerestif.metapojos.model.elements.beans.MethodBean.MethodBeanK
 import com.yannicklerestif.metapojos.model.elements.streams.ClassStream;
 
 public class DataContainer {
+
+	public boolean working = false;
 
 	private Map<String, ClassBean> classes = new HashMap<String, ClassBean>();
 
@@ -67,37 +75,18 @@ public class DataContainer {
 	// class reading
 	// ------------------------------------------------------------------------------------
 
-	public void readClasses(String[] locations) throws Exception {
-		for (int i = 0; i < locations.length; i++) {
-			File location = new File(locations[i]);
-			if (!location.exists())
-				throw new IllegalArgumentException("File doesn't exist : " + location.getAbsoluteFile());
-			if (readClassDirectoryOrJarFile(location))
-				continue;
-			readLocationsFile(location);
+	public void readClasses(String location_) throws Exception {
+		File location = new File(location_);
+		if (!location.exists())
+			throw new IllegalArgumentException("File doesn't exist : " + location.getAbsoluteFile());
+		try {
+			if (location.isDirectory())
+				readClassDirectory(location);
+			else if (location.getName().endsWith(".jar"))
+				readJarFile(location);
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
-	}
-
-	private boolean readClassDirectoryOrJarFile(File location) throws Exception {
-		if (location.isDirectory()) {
-			readClassDirectory(location);
-			return true;
-		} else if (location.getName().endsWith(".jar")) {
-			readJarFile(location);
-			return true;
-		}
-		return false;
-	}
-
-	private void readLocationsFile(File location) throws Exception {
-		Files.lines(location.toPath()).forEach(locationName -> {
-			try {
-				if (!readClassDirectoryOrJarFile(new File(locationName)))
-					throw new IllegalArgumentException("Not a jar file or a folder : " + locationName);
-			} catch (Exception e) {
-				throw new RuntimeException("Exception reading location file " + location.getAbsolutePath(), e);
-			}
-		});
 	}
 
 	private void readClassDirectory(File root) throws Exception {

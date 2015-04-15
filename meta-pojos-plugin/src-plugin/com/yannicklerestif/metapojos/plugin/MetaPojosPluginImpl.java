@@ -1,5 +1,6 @@
 package com.yannicklerestif.metapojos.plugin;
 
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
@@ -90,8 +91,8 @@ public class MetaPojosPluginImpl extends AbstractUIPlugin implements MetaPojosPl
 		return imageDescriptorFromPlugin(PLUGIN_ID, path);
 	}
 
-	public void prepareDataContainer() throws Exception {
-		dcm.prepareDataContainer();
+	public IStatus prepareDataContainer() throws Exception {
+		return dcm.prepareDataContainer();
 	}
 	
 	//------------------------ MetaPojosPlugin interface -------------------------------

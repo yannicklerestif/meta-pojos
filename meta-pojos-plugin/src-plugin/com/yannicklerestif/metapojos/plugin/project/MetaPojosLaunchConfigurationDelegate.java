@@ -15,6 +15,9 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -33,7 +36,6 @@ public class MetaPojosLaunchConfigurationDelegate extends LaunchConfigurationDel
 	@Override
 	public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor)
 			throws CoreException {
-		//TODO launches are not marked as terminated  
 		String mainType = (String) configuration.getAttributes().get(
 				IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME);
 		String projectName = (String) configuration.getAttributes().get(
@@ -54,34 +56,44 @@ public class MetaPojosLaunchConfigurationDelegate extends LaunchConfigurationDel
 			plugin.getConsole().clear();
 			plugin.getConsole().println("starting...");
 			long start = System.currentTimeMillis();
-			plugin.prepareDataContainer();
-			plugin.getConsole().println("...started - took " + (System.currentTimeMillis() - start) + " ms");
-			plugin.getConsole().println("-----------------------");
 
-			URL url = outputLocation.toURI().toURL();
-			cl = new URLClassLoader(new URL[] { url }, Thread.currentThread().getContextClassLoader());
-			clazz = cl.loadClass(mainType);
-			Method mainMethod = clazz.getMethod("main", String[].class);
-			mainMethod.invoke(null, new Object[] { null });
-			cl.close();
-		} catch (Exception e) {
-			try {
+			IStatus status = plugin.prepareDataContainer();
+
+			if (status.getSeverity() == IStatus.ERROR)
+				throw ((Exception) status.getException());
+
+			if (status.getSeverity() == IStatus.CANCEL) {
+				plugin.getConsole().println("...canceled after " + (System.currentTimeMillis() - start) + " ms");
+				plugin.getConsole().println("-----------------------");
+			} else if (status.isOK()) {
+
+				plugin.getConsole().println("...started - took " + (System.currentTimeMillis() - start) + " ms");
+				plugin.getConsole().println("-----------------------");
+
+				URL url = outputLocation.toURI().toURL();
+				cl = new URLClassLoader(new URL[] { url }, Thread.currentThread().getContextClassLoader());
+				clazz = cl.loadClass(mainType);
+				Method mainMethod = clazz.getMethod("main", String[].class);
+				mainMethod.invoke(null, new Object[] { null });
 				cl.close();
-			} catch (IOException e1) {
-				//we do not want to hide the original exception
-				e1.printStackTrace();
 			}
+		} catch (Exception e) {
 			e.printStackTrace();
 			Throwable toPrint = e;
-			if(e instanceof InvocationTargetException)
+			if (e instanceof InvocationTargetException)
 				toPrint = e.getCause();
 			StringWriter errors = new StringWriter();
 			toPrint.printStackTrace(new PrintWriter(errors));
 			plugin.getConsole().println("Error launching query :");
 			plugin.getConsole().println(errors.toString());
 		} finally {
+			try {
+				if (cl != null)
+					cl.close();
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
 			DebugPlugin.getDefault().getLaunchManager().removeLaunch(launch);
 		}
 	}
-
 }

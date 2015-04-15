@@ -1,5 +1,6 @@
 package com.yannicklerestif.metapojos.plugin.console;
 
+import java.lang.ref.WeakReference;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -29,17 +30,20 @@ import com.yannicklerestif.metapojos.model.elements.beans.JavaElementBean;
 import com.yannicklerestif.metapojos.model.elements.beans.MethodBean;
 import com.yannicklerestif.metapojos.model.elements.beans.MethodBean.MethodArgument;
 import com.yannicklerestif.metapojos.model.elements.beans.MethodBean.MethodDesc;
-import com.yannicklerestif.metapojos.plugin.MetaPojosPluginImpl;
 import com.yannicklerestif.metapojos.plugin.resources.MetaPojosWorkspace;
 
 public class MetaPojosConsoleHyperlink implements IHyperlink {
 
-	private JavaElementBean bean;
+	private WeakReference<JavaElementBean> beanRef;
 	private MetaPojosWorkspace workspace;
 
 	public MetaPojosConsoleHyperlink(MetaPojosWorkspace workspace, JavaElementBean bean) {
 		this.workspace = workspace;
-		this.bean = bean;
+		this.beanRef = new WeakReference<JavaElementBean>(bean);
+	}
+	
+	private JavaElementBean getBean() {
+		return beanRef.get();
 	}
 
 	/**
@@ -58,12 +62,12 @@ public class MetaPojosConsoleHyperlink implements IHyperlink {
 		try {
 			// TODO refactor to not have to do this switch
 			ClassBean classBean = null;
-			if(bean instanceof ClassBean)
-				classBean = (ClassBean) bean;
-			else if(bean instanceof MethodBean)
-				classBean = ((MethodBean) bean).getClassBean();
+			if(getBean() instanceof ClassBean)
+				classBean = (ClassBean) getBean();
+			else if(getBean() instanceof MethodBean)
+				classBean = ((MethodBean) getBean()).getClassBean();
 			else
-				classBean = ((CallBean) bean).getSource().getClassBean();
+				classBean = ((CallBean) getBean()).getSource().getClassBean();
 			
 			String enclosingTypeName = getEnclosingTypeName(classBean);
 			IType enclosingType = findType(enclosingTypeName);
@@ -72,8 +76,8 @@ public class MetaPojosConsoleHyperlink implements IHyperlink {
 				return;
 			}
 
-			if (bean instanceof CallBean) {
-				openEditor(enclosingType, ((CallBean) bean).getLine() - 1);
+			if (getBean() instanceof CallBean) {
+				openEditor(enclosingType, ((CallBean) getBean()).getLine() - 1);
 				return;
 			}
 			
@@ -92,7 +96,7 @@ public class MetaPojosConsoleHyperlink implements IHyperlink {
 				return;
 			}
 		} catch (Exception e) {
-			MessageDialog.openError(null, "Error opening element", "Error opening element : " + bean);
+			MessageDialog.openError(null, "Error opening element", "Error opening element : " + getBean());
 			e.printStackTrace();
 		}
 	}
@@ -142,7 +146,7 @@ public class MetaPojosConsoleHyperlink implements IHyperlink {
 	}
 
 	private void noResultsFound() {
-		MessageDialog.openError(null, "Couldn't find element", "Couldn't find element : " + bean);
+		MessageDialog.openError(null, "Couldn't find element", "Couldn't find element : " + getBean());
 	}
 
 	private static String convertToEclipseName(ClassBean classBean) {
@@ -193,14 +197,14 @@ public class MetaPojosConsoleHyperlink implements IHyperlink {
 	}
 
 	private void openClassOrMethod(IType type) throws CoreException, BadLocationException {
-		if(bean instanceof ClassBean)
+		if(getBean() instanceof ClassBean)
 			openEditor(type, -1);
 		else {
 			IJavaElement element = findMethodInType(type);
 			if(element == null) {
 				//if type is binary, it is not impossible, but very unlikely, so it's better to log.
 				//if type isn't binary, this is not normal
-				System.err.println("Could find type but not the method : " + bean);
+				System.err.println("Could find type but not the method : " + getBean());
 				//defaulting to approximate line number
 				openEditor(type);
 			} else 
@@ -213,22 +217,22 @@ public class MetaPojosConsoleHyperlink implements IHyperlink {
 	private void openEditor(IType enclosingType) throws CoreException, BadLocationException {
 		System.err.println("defaulting to approximate line number");
 		int lineNumber;
-		if(bean instanceof ClassBean) {
+		if(getBean() instanceof ClassBean) {
 			//TODO explain
-			lineNumber = ((ClassBean) bean).getLineNumber() - 1;
+			lineNumber = ((ClassBean) getBean()).getLineNumber() - 1;
 		} else {
 			//TODO explain
-			lineNumber = ((MethodBean) bean).getLineNumber() - 2;
+			lineNumber = ((MethodBean) getBean()).getLineNumber() - 2;
 		}
 		if(lineNumber < 0) {
 			lineNumber = -1;
-			System.err.println("no valid line number found in java element : " + bean.toString());
+			System.err.println("no valid line number found in java element : " + getBean().toString());
 		}
 		openEditor(enclosingType, lineNumber);
 	}
 
 	private IJavaElement findMethodInType(IType type) throws JavaModelException {
-		MethodBean methodBean = (MethodBean) bean;
+		MethodBean methodBean = (MethodBean) getBean();
 		String methodBeanName = null;
 		MethodDesc args = methodBean.getMethodDesc();
 		if(args.isConstructor)
