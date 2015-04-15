@@ -17,9 +17,9 @@ Meta Pojos home page is located at [http://yannicklerestif.com/meta-pojos.com](h
 There you will find some detailed instructions about how to install it and use it.
 
 ## Build from source
-Pre-requisite : of course your eclipse must have PDE installed. But it must also run on a Java 8 JVM, because Meta Pojos is very much based on Java 8 streams.
-Clone or fork meta-pojos, then import root project and sub-projects in eclipse (*Import / Existing Projects into Workspace*).
-The main folders under the root are :
+Pre-requisite : of course your eclipse must have PDE installed. But it must also run on a Java 8 JVM, because Meta Pojos is very much based on Java 8 streams.   
+Clone or fork meta-pojos, then import root project and sub-projects in eclipse (*Import / Existing Projects into Workspace*).   
+The main folders under the root are :   
 ```
 meta-pojos
 |-meta-pojos-plugin
@@ -36,4 +36,4 @@ Building from source is nothing special, apart from one thing : on first launch,
 
 This is enough to run another eclipse that has the plugin compiled from source. To do that, right-click `meta-pojos-plugin` and choose *Run As / Eclipse Application*.
 
-To build the whole project site, double-click `meta-pojos/meta-pojos-update-site/site.xml` and open the site `meta-pojos`. Clicking *Build All* is supposed to be enough, but I found out I have to remove the feature (right-click and then *Remove*) and add it again, being careful to choose the one with the version 1.1.0.qualifier, not the one with the qualifier resolved (e.g. 1.1.0.201504151448). Then, click *Build All*. You can then use the output as a local update site for any eclipse application (using *Help/Install New Software...* for a new installation, or *Help/Installation Details* for updating).
+To build the project site, double-click `meta-pojos/meta-pojos-update-site/site.xml` and open the site `meta-pojos`. Clicking *Build All* is supposed to be enough, but I found out I have to remove the feature (right-click and then *Remove*) and add it again, being careful to choose the one with the version 1.1.0.qualifier, not the one with the qualifier resolved (e.g. 1.1.0.201504151448). Then, click *Build All*. You can then use the output as a local update site for any eclipse application (using *Help/Install New Software...* for a new installation, or *Help/Installation Details* for updating).
